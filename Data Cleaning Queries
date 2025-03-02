@@ -1,4 +1,5 @@
 1- مقداردهی company_id بر اساس 2 رقم آخر شماره تلفن
+
 //sql
 UPDATE SABA_USERS t
 SET COMPANY_ID = SUBSTR(PHONE, -2)
@@ -34,7 +35,8 @@ UPDATE SABA_USERS t
 SET EMAIL = USER_NAME || '@gmail.com'
 WHERE USER_NAME IS NOT NULL;
 
-5-حذف داده
+5- حذف داده
+
 DELETE FROM SABA_BOARD
 WHERE ID IS NULL ;
 
@@ -77,3 +79,206 @@ WHERE ID > 2;
 UPDATE SABA_USERS t
 SET PHONE = '09999999999999'
 WHERE ID = 1;
+
+9- بررسی و حذف مقادیر Null
+
+برای شناسایی رکوردهایی که شامل مقادیر Null هستند:
+SELECT * 
+FROM SABA_BOARD
+WHERE ID IS NULL 
+   OR TYPE IS NULL 
+   OR SHAREHOLDER_ID IS NULL 
+   OR STATUS IS NULL 
+   OR POSITION IS NULL 
+   OR NAME_ID IS NULL;
+حذف رکوردهایی که شامل مقادیر Null هستند:
+
+DELETE FROM SABA_BOARD
+WHERE ID IS NULL 
+   OR TYPE IS NULL 
+   OR SHAREHOLDER_ID IS NULL 
+   OR STATUS IS NULL 
+   OR POSITION IS NULL 
+   OR NAME_ID IS NULL;
+
+
+10- حذف مقادیر تکراری (Duplicate Records)
+
+برای پیدا کردن رکوردهای تکراری:
+SELECT ID, COUNT(*)
+FROM SABA_BOARD
+GROUP BY ID
+HAVING COUNT(*) > 1;
+برای حذف رکوردهای تکراری (حفظ یکی از آنها):
+DELETE FROM SABA_BOARD
+WHERE ROWID NOT IN (
+    SELECT MIN(ROWID)
+    FROM SABA_BOARD
+    GROUP BY ID, TYPE, SHAREHOLDER_ID, STATUS, POSITION, NAME_ID
+);
+
+
+11- تنظیم مقادیر نامعتبر (Invalid Data)
+
+برای بررسی مقادیر غیرمجاز در فیلدها (مثلاً مقادیر منفی یا تاریخ‌های اشتباه):
+SELECT * 
+FROM SABA_BOARD
+WHERE TYPE < 0 
+   OR STATUS NOT IN (1, 2, 3, 4, 5) 
+   OR JOIN_DATE > SYSDATE;
+برای اصلاح مقادیر:
+UPDATE SABA_BOARD
+SET TYPE = 1
+WHERE TYPE < 0;
+
+UPDATE SABA_BOARD
+SET JOIN_DATE = SYSDATE
+WHERE JOIN_DATE > SYSDATE;
+
+
+12- حذف رکوردهای غیرضروری
+
+برای حذف رکوردهایی که شرط خاصی را ندارند (مثلاً رکوردهایی با STATUS = 0):
+DELETE FROM SABA_BOARD
+WHERE STATUS = 0;
+
+
+13- تبدیل فرمت داده‌ها (Data Standardization)
+
+برای استاندارد کردن مقادیر فیلدهای متنی:
+UPDATE SABA_BOARD
+SET POSITION = UPPER(POSITION); -- تبدیل متن به حروف بزرگ
+
+
+14-جایگزینی مقادیر Null با مقادیر پیش‌فرض
+
+برای شناسایی مقادیر NULL و جایگزین کردن آن‌ها با مقادیر پیش‌فرض:
+UPDATE SABA_BOARD
+SET TYPE = 0
+WHERE TYPE IS NULL;
+
+UPDATE SABA_BOARD
+SET SHAREHOLDER_ID = -1
+WHERE SHAREHOLDER_ID IS NULL;
+
+UPDATE SABA_BOARD
+SET JOIN_DATE = TO_DATE('01-01-2000', 'MM-DD-YYYY')
+WHERE JOIN_DATE IS NULL;
+
+
+15- تغییر فرمت تاریخ‌ها
+
+برای اطمینان از هماهنگی فرمت تاریخ‌ها:
+SELECT TO_CHAR(JOIN_DATE, 'YYYY-MM-DD') AS FORMATTED_DATE
+FROM SABA_BOARD;
+
+UPDATE SABA_BOARD
+SET JOIN_DATE = TO_DATE(TO_CHAR(JOIN_DATE, 'YYYY-MM-DD'), 'YYYY-MM-DD')
+WHERE JOIN_DATE IS NOT NULL;
+
+
+16-بررسی و حذف داده‌های خارج از محدوده (Outliers)
+
+برای پیدا کردن داده‌هایی که خارج از محدوده مورد انتظار هستند:
+SELECT * 
+FROM SABA_BOARD
+WHERE TYPE NOT BETWEEN 1 AND 10 -- به‌عنوان مثال
+   OR STATUS NOT IN (1, 2, 3, 4, 5);
+برای حذف این داده‌ها:
+DELETE FROM SABA_BOARD
+WHERE TYPE NOT BETWEEN 1 AND 10
+   OR STATUS NOT IN (1, 2, 3, 4, 5);
+
+
+17- استانداردسازی متون و حذف فاصله‌های اضافی
+
+برای حذف فاصله‌های اضافی یا خالی کردن داده‌های متنی:
+UPDATE SABA_BOARD
+SET NAME_ID = TRIM(NAME_ID);
+
+UPDATE SABA_BOARD
+SET POSITION = INITCAP(POSITION); -- تبدیل متن به حالت حروف بزرگ و کوچک استاندارد
+
+
+18- اضافه کردن ستون‌های محاسباتی
+
+برای اضافه کردن ستونی جدید که یک مقدار محاسباتی دارد:
+ALTER TABLE SABA_BOARD ADD TOTAL_YEARS NUMBER;
+
+UPDATE SABA_BOARD
+SET TOTAL_YEARS = ROUND((SYSDATE - JOIN_DATE) / 365, 2);
+
+
+19- بررسی یکپارچگی کلید خارجی (Foreign Key Integrity)
+
+برای شناسایی رکوردهایی که کلید خارجی‌شان معتبر نیست:
+SELECT * 
+FROM SABA_BOARD b
+WHERE NOT EXISTS (
+    SELECT 1 
+    FROM SHAREHOLDERS s
+    WHERE b.SHAREHOLDER_ID = s.ID
+);
+برای حذف رکوردهایی که کلید خارجی آن‌ها نامعتبر است:
+DELETE FROM SABA_BOARD
+WHERE SHAREHOLDER_ID NOT IN (
+    SELECT ID 
+    FROM SHAREHOLDERS
+);
+
+20- ایجاد گزارش‌های خلاصه برای بررسی داده‌ها
+
+برای خلاصه‌سازی داده‌ها:
+SELECT STATUS, COUNT(*) AS RECORD_COUNT
+FROM SABA_BOARD
+GROUP BY STATUS;
+
+SELECT TO_CHAR(JOIN_DATE, 'YYYY'), COUNT(*) AS YEARLY_COUNT
+FROM SABA_BOARD
+GROUP BY TO_CHAR(JOIN_DATE, 'YYYY');
+
+21- حذف رکوردهایی که تاریخ اشتباه دارند
+
+برای شناسایی تاریخ‌های نادرست
+SELECT * 
+FROM SABA_BOARD
+WHERE JOIN_DATE < TO_DATE('01-01-1900', 'MM-DD-YYYY')
+   OR JOIN_DATE > SYSDATE;
+برای حذف این رکوردها:
+DELETE FROM SABA_BOARD
+WHERE JOIN_DATE < TO_DATE('01-01-1900', 'MM-DD-YYYY')
+   OR JOIN_DATE > SYSDATE;
+
+
+22- ایجاد نسخه پشتیبان از داده‌ها قبل از پاک‌سازی
+
+پیش از هر تغییری، می‌توانید یک نسخه از داده‌ها را در یک جدول جدید ذخیره کنید:
+CREATE TABLE SABA_BOARD_BACKUP AS
+SELECT * 
+FROM SABA_BOARD;
+
+
+23-  شناسایی و اصلاح ناسازگاری‌های بین جدول‌ها
+
+برای پیدا کردن تناقض بین دو جدول مرتبط:
+SELECT b.*
+FROM SABA_BOARD b
+LEFT JOIN SHAREHOLDERS s ON b.SHAREHOLDER_ID = s.ID
+WHERE s.ID IS NULL;
+برای حذف رکوردهای ناسازگار:
+DELETE FROM SABA_BOARD
+WHERE SHAREHOLDER_ID NOT IN (
+    SELECT ID 
+    FROM SHAREHOLDERS
+);
+
+
+24- مشاهده و مرتب‌سازی رکوردهای مشکل‌دار برای تحلیل بیشتر
+
+برای مرتب کردن داده‌ها بر اساس اولویت مشکلات:
+SELECT *
+FROM SABA_BOARD
+WHERE ID IS NULL 
+   OR TYPE IS NULL 
+   OR JOIN_DATE > SYSDATE
+ORDER BY JOIN_DATE DESC, ID;
