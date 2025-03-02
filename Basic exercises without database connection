@@ -1,0 +1,214 @@
+--1- چاپ یک متغییر
+DECLARE
+  message varchar2(100):= 'Hello, World!'; -- اعلان یک متغیر
+BEGIN 
+  dbms_output.put_line(message);-- چاپ مقدار متغیر
+END;
+/
+
+Hello, World!
+-----------------------------------------------------
+تعریف کردن یک اسم برای اون متغییر--2-
+
+DECLARE
+   v_age NUMBER; -- اعلان یک متغیر جدید
+BEGIN
+   v_age := 25;
+   dbms_output.put_line('Age: ' || v_age); -- چاپ متغیر
+END;
+/
+
+Age: 25
+-----------------------------------------------------
+چاپ یک جمله--3-
+
+BEGIN --شروع بلوک
+   DBMS_OUTPUT.PUT_LINE('Hello this is my first plsql'); --یک متد برای چاپ متن یا مقادیر متغیر در خروجی
+END; --پایان بلوک
+/
+
+
+Hello this is my first plsql
+-----------------------------------------------------
+-4-یک عدد را بررسی می‌کنیم که آیا مثبت است یا نه.
+DECLARE
+   v_message VARCHAR2(100); -- تعریف متغیر
+BEGIN
+   v_message := 'Hi iam a variable'; -- مقداردهی به متغیر
+   DBMS_OUTPUT.PUT_LINE(v_message); -- چاپ مقدار متغیر
+END;
+/
+
+
+Hi iam a variable
+-----------------------------------------------------
+--5-استفاده از شرط if  برای تعریف متغییر(با مقداردهی به متغییر)
+DECLARE
+   v_number NUMBER; -- تعریف متغیر
+BEGIN
+   v_number := 10; -- مقداردهی به متغیر
+   IF v_number > 0 THEN
+      DBMS_OUTPUT.PUT_LINE('It is positive!!');
+   END IF;
+END;
+/
+It is positive!!
+------------------------------------------------------
+--6--استفاده از شرط if  برای تعریف متغییر(با مقداردهی به متغییر)
+DECLARE
+   v_number NUMBER; -- تعریف متغیر
+BEGIN
+   v_number := -5; -- مقداردهی به متغیر
+   IF v_number > 0 THEN
+      DBMS_OUTPUT.PUT_LINE('It is +.');
+   ELSE
+      DBMS_OUTPUT.PUT_LINE('It is -.');
+   END IF;
+END;
+/
+
+It is -.
+-------------------------------------------------------
+--7-if-elsif-else
+
+DECLARE
+   v_number NUMBER; -- تعریف متغیر
+BEGIN
+   v_number := 0; -- مقداردهی به متغیر
+   IF v_number > 0 THEN
+      DBMS_OUTPUT.PUT_LINE('It is +!');
+   ELSIF v_number < 0 THEN
+      DBMS_OUTPUT.PUT_LINE('It is -!');
+   ELSE
+      DBMS_OUTPUT.PUT_LINE('It is 0!');
+   END IF;
+END;
+/
+
+It is 0!
+------------------------------------------------------
+--8-if_elsif-else
+
+برنامه‌ای بنویس که یک متغیر به نام v_grade داشته باشد. اگر مقدار آن بیشتر از 90 بود، پیام "عالی"، اگر بین 70 و 90 بود، پیام "خوب"، و در غیر این صورت پیام "نیاز به تلاش بیشتر" را چاپ کند.
+
+DECLARE
+   v_grade NUMBER; -- تعریف متغیر
+BEGIN
+   v_grade := 0; -- مقداردهی به متغیر
+   IF v_grade > 90 THEN
+      DBMS_OUTPUT.PUT_LINE('Perfect!');
+   ELSIF v_grade > 70 AND v_grade < 90 THEN
+      DBMS_OUTPUT.PUT_LINE('Good!');
+   ELSE
+      DBMS_OUTPUT.PUT_LINE('Need more try!');
+   END IF;
+END;
+/
+
+Need more try!
+-------------------------------------------------------
+ --9-چاپ اعداد 1 تا 5 با استفاده از یک حلقه ساده:
+
+DECLARE
+	v_counter NUMBER := 1; --تعریف متغیر شمارنده
+BEGIN
+	Loop
+    	DBMS_OUTPUT.PUT_LINE('ADAD:'||v_counter);--چاپ مقدار شمارنده
+   		v_counter := v_counter+1;--افزایش شمارنده
+    	Exit when v_counter > 5;--خروج از حلقه زمانی که شرط برقرار میشود
+    END Loop;
+END;
+/
+
+ADAD:1
+ADAD:2
+ADAD:3
+ADAD:4
+ADAD:5
+-------------------------------------------------------
+--10- چاپ اعداد 1 تا 5 با استفاده از یک حلقه WHILE
+
+
+DECLARE
+   v_counter NUMBER := 1; -- تعریف متغیر شمارنده
+BEGIN
+   WHILE v_counter <= 5 LOOP
+      DBMS_OUTPUT.PUT_LINE('NUM: ' || v_counter); -- چاپ مقدار شمارنده
+      v_counter := v_counter + 1; -- افزایش شمارنده
+   END LOOP;
+END;
+/
+
+
+NUM: 1
+NUM: 2
+NUM: 3
+NUM: 4
+NUM: 5
+-------------------------------------------------------
+--11- چاپ اعداد 1 تا 5 با استفاده از یک حلقه FOR
+
+BEGIN
+   FOR v_counter IN 1..5 LOOP
+      DBMS_OUTPUT.PUT_LINE('N: ' || v_counter); -- چاپ مقدار شمارنده
+   END LOOP;
+END;
+/
+
+
+N: 1
+N: 2
+N: 3
+N: 4
+N: 5
+-------------------------------------------------------
+--12-مدیریت یک خطای پیش‌فرض
+
+DECLARE
+   v_num1 NUMBER := 10; -- عدد اول
+   v_num2 NUMBER := 0;  -- عدد دوم
+   v_result NUMBER;     -- نتیجه
+BEGIN
+   v_result := v_num1 / v_num2; -- تقسیم بر صفر (خطا)
+   DBMS_OUTPUT.PUT_LINE('RESULT:  ' || v_result);
+EXCEPTION
+   WHEN ZERO_DIVIDE THEN
+      DBMS_OUTPUT.PUT_LINE('ERRORRR!');
+END;
+/
+
+ERRORRR!
+-------------------------------------------------------
+-13--مدیریت خطای دیگر (OTHERS)
+
+DECLARE
+   v_num1 NUMBER := 10; -- عدد اول
+   v_num2 NUMBER := 0;  -- عدد دوم
+   v_result NUMBER;     -- نتیجه
+BEGIN
+   v_result := v_num1 / v_num2; -- خطا (تقسیم بر صفر)
+   DBMS_OUTPUT.PUT_LINE('نتیجه: ' || v_result);
+EXCEPTION
+   WHEN ZERO_DIVIDE THEN
+      DBMS_OUTPUT.PUT_LINE('ERROR (TAGHSIM BAR 0)!');
+   WHEN OTHERS THEN
+      DBMS_OUTPUT.PUT_LINE('UNKNONWN ERROR!!');
+END;
+
+
+ERROR (TAGHSIM BAR 0)!
+-------------------------------------------------------
+-14—ایجاد خطای دستی با RAISE
+
+DECLARE
+   v_age NUMBER := 15;         -- مقدار سن
+BEGIN
+   IF v_age < 18 THEN
+      RAISE_APPLICATION_ERROR (-20001, 'MIN OLD')  ;     --ایجاد خطای سفارشی
+   END IF;
+   DBMS_OUTPUT.PUT_LINE(' it is ok');
+END;
+/
+
+-------------------------------------------------------
+
