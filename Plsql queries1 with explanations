@@ -1,0 +1,161 @@
+استخراج اطلاعات و چاپ:
+1-	select t.*, t.rowid from SABA_COMPANY t         
+#getting all informations
+2-	
+DECLARE     برای تعریف متغیرها و اشیاء#         
+    CURSOR cur_company IS
+        SELECT * FROM SABA_COMPANY WHERE ROWNUM <= 6;
+)یک Cursor به نام  cur_company تعریف شده است.
+این Cursor وظیفه دارد تا حداکثر 6 رکورد اول جدول SABA_COMPANY را بازیابی کند. شرط ROWNUM <= 6 فقط اولین 6 رکورد را انتخاب می‌کند.(
+
+    v_row cur_company%ROWTYPE;
+
+متغیری به نام v_row تعریف شده است.
+نوع این متغیر بر اساس نوع ستون‌های Cursor (cur_company) است. به عبارتی، متغیر v_row می‌تواند تمامی ستون‌های مربوط به یک رکورد از جدول SABA_COMPANY را نگه‌داری کند.
+BEGIN      # آغاز
+    OPEN cur_company;     #Cursor باز می‌شود و آماده پردازش رکورده
+    LOOP
+        FETCH cur_company INTO v_row;
+        EXIT WHEN cur_company%NOTFOUND;
+        DBMS_OUTPUT.PUT_LINE(' City: ' || v_row.city || ', Phone: ' || v_row.phone);
+    END LOOP;   # حلقه تمام شده و کنترل برنامه به دستور بعدی منتقل می‌شود.
+    CLOSE cur_company;  #Cursor بسته می‌شود تا منابع آزاد شوند.
+END;     #  بلوک PL/SQL خاتمه
+/
+
+یک حلقه LOOP آغاز می‌شود که تا زمانی که رکوردها در Cursor وجود دارد، اجرا خواهد شد.
+دستور FETCH cur_company INTO v_row، رکورد فعلی از Cursor را به متغیر  v_row  منتقل می‌کند.
+  اگر Cursor به پایان رکوردها رسید (رکورد دیگری برای پردازش وجود نداشت)، شرط   cur_company%NOTFOUND   برقرار می‌شود.
+  در این صورت، حلقه  EXIT  کرده و متوقف می‌شود.
+این دستور از DBMS_OUTPUT.PUT_LINE استفاده می‌کند تا مقدار ستون‌های city و phone مربوط به رکورد فعلی را چاپ کند.
+  v_row.city و v_row.phone ستون‌های مربوط به city و phone از رکورد فعلی را بازتاب می‌دهند.
+
+DECLARE
+    CURSOR cur_company IS
+        SELECT * FROM SABA_COMPANY WHERE ROWNUM <= 3;
+    v_row cur_company%ROWTYPE;
+BEGIN
+    OPEN cur_company;
+    LOOP
+        FETCH cur_company INTO v_row;
+        EXIT WHEN cur_company%NOTFOUND;
+        DBMS_OUTPUT.PUT_LINE('Company Name: ' || v_row.column_name || ', City: ' || v_row.city || ', Phone: ' || v_row.phone);
+    END LOOP;
+    CLOSE cur_company;
+END;
+/
+City: 43, Phone: ۰۲۱-۸۹۴۸
+ City: 45, Phone: 44422210
+ City: 43, Phone: 88603130
+ City: 43, Phone: ۴۰۸۸۲۷۰۱-10
+ City: 43, Phone: ۸۶۰۸۰۴۶۰
+ City: 43, Phone: 86712989
+به‌روزرسانی یک رکورد
+
+BEGIN      # کد شروع           
+    UPDATE SABA_COMPANY
+    SET phone = '021-12345678'
+    WHERE COMPANY_TYPE = 1;
+
+    IF SQL%ROWCOUNT > 0 THEN
+        DBMS_OUTPUT.PUT_LINE('Record updated successfully.');
+    ELSE
+        DBMS_OUTPUT.PUT_LINE('No record found.');
+    END IF;    # پایان بلوک شرطی    
+END;
+/
+Record updated successfully.
+دستور UPDATE اطلاعات موجود در جدول SABA_COMPANY را به‌روزرسانی می‌کند.
+ستون phone مقدار جدید '021-12345678' را دریافت می‌کند.
+شرط WHERE COMPANY_TYPE = 1 مشخص می‌کند که این تغییر فقط برای رکوردهایی اعمال شود که مقدار ستون COMPANY_TYPE برابر 1 باشد.
+اگر رکوردی وجود نداشته باشد که این شرط را برآورده کند، هیچ تغییری اعمال نمی‌شود.
+عبارت SQL%ROWCOUNT  نشان می‌دهد که چند رکورد توسط دستور UPDATE تغییر کرده‌اند.
+اگر مقدار SQL%ROWCOUNT  بزرگ‌تر از صفر باشد، یعنی حداقل یک رکورد به‌روزرسانی شده است و شرط برقرار می‌شود.
+در این حالت، بخش THEN  اجرا می‌شود
+اگر شرط SQL%ROWCOUNT > 0 برقرار باشد، این خط اجرا شده و پیغام 'Record updated successfully.' چاپ می‌شود.
+این پیام نشان می‌دهد که به‌روزرسانی با موفقیت انجام شده است..
+اگر مقدار SQL%ROWCOUNT برابر صفر باشد (یعنی هیچ رکوردی تغییر نکرده باشد)، کنترل برنامه به بخش ELSE منتقل می‌شود.
+اگر هیچ رکوردی با شرط WHERE COMPANY_TYPE = 1 پیدا نشود، این خط اجرا شده و پیام 'No record found.' چاپ می‌شود.
+درج یک رکورد جدید
+ 
+
+حذف رکوردها بر اساس شرط-4
+
+این کد رکوردهایی که در یک شهر خاص هستند را حذف می‌کند:
+BEGIN
+    DELETE FROM SABA_COMPANY
+    WHERE city = 'کیش';
+
+    DBMS_OUTPUT.PUT_LINE(SQL%ROWCOUNT || ' rows deleted.');
+END;
+/
+
+
+ORA-02292: integrity constraint (SABA_NEW_TEST.SABA_MEETING_MINUTES_PK06) violated - child record found
+ORA-06512: at line 2
+5. جستجو و چاپ رکورد بر اساس ROWID
+DECLARE
+    v_row SABA_COMPANY%ROWTYPE;
+BEGIN
+    SELECT *
+    INTO v_row
+    FROM SABA_COMPANY
+    WHERE ROWID = 'AAAX16AANAAA9HTAAA';
+
+    DBMS_OUTPUT.PUT_LINE('Company Name: ' || v_row.company_name || ', Address: ' || v_row.address);
+END;
+/
+6. محاسبات روی ستون‌های عددی
+DECLARE
+    v_total_salary NUMBER;
+BEGIN
+    SELECT SUM(salary)
+    INTO v_total_salary
+    FROM SABA_COMPANY;
+
+    DBMS_OUTPUT.PUT_LINE('Total Salary: ' || v_total_salary);
+END;
+/
+•	CURSOR: برای پیمایش چندین ردیف استفاده می‌شود.
+•	ROWID: شناسه منحصر به فرد هر ردیف در جدول است.
+•	DBMS_OUTPUT.PUT_LINE: برای نمایش خروجی در کنسول.
+•	ستون‌ها و مقادیر را بر اساس نیازتان تغییر دهید.
+////////////JOINS:///////////////
+
+**Result ==> (جدول اصلی)سمت چپ: saba_users_rowid  |  سمت راست: saba_board_rowid
+SELECT
+    t1.*, t1.rowid AS saba_users_rowid, 
+    t2.*, t2.rowid AS saba_board_rowid
+FROM
+    SABA_USERS t1
+LEFT JOIN 
+    SABA_BOARD t2 ON
+    t1.ID = t2.ID;
+----------------------------------------------------------------------------------	
+**Result ==> سمت چپ: saba_board_rowid | (جدول اصلی)سمت راست:  saba_users_rowid
+SELECT
+    t1.*, t1.rowid AS saba_users_rowid, 
+    t2.*, t2.rowid AS saba_board_rowid
+FROM
+    SABA_USERS t1
+RIGHT JOIN 
+    SABA_BOARD t2 ON
+    t1.ID = t2.ID;
+----------------------------------------------------------------------------------
+SELECT
+    t1.*, t1.rowid AS saba_users_rowid, 
+    t2.*, t2.rowid AS saba_board_rowid
+FROM
+    SABA_USERS t1
+LEFT JOIN 
+    SABA_BOARD t2 ON
+    t1.ID = t2.ID;
+---------------------------------------------------------------------------------
+SELECT
+    t1.*, t1.rowid AS saba_users_rowid, 
+    t2.*, t2.rowid AS saba_board_rowid
+FROM
+    SABA_USERS t1
+INNER JOIN 
+    SABA_BOARD t2 ON
+    t1.ID = t2.ID;
