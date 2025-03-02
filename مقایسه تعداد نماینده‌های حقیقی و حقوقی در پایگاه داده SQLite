@@ -1,0 +1,27 @@
+import sqlite3
+import pandas as pd  # اختیاری برای نمایش بهتر نتیجه
+import matplotlib.pyplot as plt
+
+# اتصال به پایگاه داده
+conn = sqlite3.connect('firstconnection_database.db')
+
+# اجرای کوئری برای مقایسه تعداد نماینده‌های حقیقی و حقوقی
+query = '''
+SELECT agentType, COUNT(*) as count
+FROM firstconnection_table
+GROUP BY agentType;
+'''
+df = pd.read_sql_query(query, conn)
+print(df)
+
+
+# رسم نمودار
+plt.bar(df['type'], df['count'], color=['blue', 'orange'])  # رنگ‌ها را به دلخواه تغییر دهید
+plt.xlabel('نوع نماینده')
+plt.ylabel('تعداد')
+plt.title('مقایسه تعداد نماینده‌های حقیقی و حقوقی')
+plt.xticks(rotation=45)
+plt.show()
+
+# بستن اتصال به پایگاه داده
+conn.close()
