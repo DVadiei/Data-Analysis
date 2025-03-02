@@ -1,0 +1,94 @@
+1.	GET ALL INFO(SABA_BOARD):
+select t.*, t.rowid from SABA_BOARD t
+
+2.	plsql code for SABA_USERS t
+select t.*, t.rowid from SABA_USERS t
+
+3.	اعضای فعال هیئت‌مدیره(Saba_Board)
+#2=inactive      #1=active
+
+BEGIN
+    FOR rec IN (
+        SELECT SHAREHOLDER_ID, BOARD_ID, POSITION 
+        FROM SABA_BOARD
+        WHERE STATUS = 1
+    ) LOOP
+        DBMS_OUTPUT.PUT_LINE('Board Member - Shareholder ID: ' || rec.SHAREHOLDER_ID || ', Position: ' || rec.POSITION);
+    END LOOP;
+END;
+
+4.	پرونده‌های تأیید نشده(Saba_Board)
+BEGIN
+    FOR rec IN (
+        SELECT SHAREHOLDER_ID, FILE_STATUS 
+        FROM SABA_BOARD
+        WHERE FORM_CONFIRM IS NULL
+    ) LOOP
+        DBMS_OUTPUT.PUT_LINE('Unconfirmed File - Shareholder ID: ' || rec.SHAREHOLDER_ID || ', Status: ' || rec.FILE_STATUS);
+    END LOOP;
+END;
+
+5.	تاریخ‌های اشتباه (عضویت بعد از خروج)(Saba_Board)
+DECLARE
+    v_error_count NUMBER;
+BEGIN
+    SELECT COUNT(*)
+    INTO v_error_count
+    FROM SABA_BOARD
+    WHERE JOIN_DATE > EJECTION_DATE;
+
+    DBMS_OUTPUT.PUT_LINE('Number of errors in dates: ' || v_error_count);
+END;
+
+6.	تعداد پرونده‌ها در هر وضعیت(Saba_Board)
+DECLARE
+    CURSOR c_status IS
+        SELECT FILE_STATUS, COUNT(*) AS STATUS_COUNT
+        FROM SABA_BOARD
+        GROUP BY FILE_STATUS;
+BEGIN
+    FOR rec IN c_status LOOP
+        DBMS_OUTPUT.PUT_LINE('File Status: ' || rec.FILE_STATUS || ', Count: ' || rec.STATUS_COUNT);
+    END LOOP;
+END;
+
+7.	سهام‌داران جدید در یک بازه زمانی خاص(Saba_Board)
+
+DECLARE
+    v_start_date DATE := TO_DATE('2024-01-01', 'YYYY-MM-DD');
+    v_end_date DATE := TO_DATE('2024-12-31', 'YYYY-MM-DD');
+BEGIN
+    FOR rec IN (
+        SELECT SHAREHOLDER_ID, JOIN_DATE 
+        FROM SABA_BOARD
+        WHERE JOIN_DATE BETWEEN v_start_date AND v_end_date
+    ) LOOP
+        DBMS_OUTPUT.PUT_LINE('Shareholder ID: ' || rec.SHAREHOLDER_ID || ', Join Date: ' || rec.JOIN_DATE);
+    END LOOP;
+END;
+
+
+8.	سهام‌داران خارج‌شده در یک بازه زمانی خاص(Saba_Board)
+DECLARE
+    v_start_date DATE := TO_DATE('2024-01-01', 'YYYY-MM-DD');
+    v_end_date DATE := TO_DATE('2024-12-31', 'YYYY-MM-DD');
+BEGIN
+    FOR rec IN (
+        SELECT SHAREHOLDER_ID, EJECTION_DATE 
+        FROM SABA_BOARD
+        WHERE EJECTION_DATE IS NOT NULL AND EJECTION_DATE BETWEEN v_start_date AND v_end_date
+    ) LOOP
+        DBMS_OUTPUT.PUT_LINE('Shareholder ID: ' || rec.SHAREHOLDER_ID || ', Ejection Date: ' || rec.EJECTION_DATE);
+    END LOOP;
+END;
+
+9.	لیست سهام‌داران هر شرکت(Saba_Board)
+BEGIN
+    FOR rec IN (
+        SELECT COMPANY_ID, SHAREHOLDER_ID 
+        FROM SABA_BOARD
+        WHERE COMPANY_ID IS NOT NULL
+    ) LOOP
+        DBMS_OUTPUT.PUT_LINE('Company ID: ' || rec.COMPANY_ID || ', Shareholder ID: ' || rec.SHAREHOLDER_ID);
+    END LOOP;
+END;
