@@ -1,0 +1,1404 @@
+query:
+select  ID,
+        NAME,
+        REGISTER_NUMBER,
+       national_code, 
+       case
+       when
+       ACTIVITY_TYPE=1 then 'تولیدی'
+       when ACTIVITY_TYPE=2 then 'خدماتی'
+       when ACTIVITY_TYPE=3 then 'سرمایه گذاری'
+       when ACTIVITY_TYPE=4 then 'پیمانکاری'
+       when ACTIVITY_TYPE=5 then 'موسسه حقوقی'
+       when ACTIVITY_TYPE=6 then 'موسسه آموزشی'
+       when ACTIVITY_TYPE=7 then 'فعالیت بیمه ای'
+       when ACTIVITY_TYPE=8 then 'بازرگانی'
+       end ACTIVITY_TYPE, 
+       DECODE(company_type, 1, 'سهامی خاص', 
+           2,'سهامی عام',
+        3,'تضامنی',
+        4,'نسبی',
+        5,'تعاونی',
+        6,'مختلط',
+        7,'موسسه')
+        company_type, 
+        financial_day,               این ستون روز مالی شرکت را انتخاب می‌کند--
+     
+  CASE 
+       WHEN FORM_CONFIRM is null THEN '-'
+       WHEN FORM_CONFIRM=23 then 'منتظر رسیدگی'
+       WHEN FORM_CONFIRM=24 then 'تایید شده'
+       WHEN FORM_CONFIRM=25 then ' رد شده'
+       END as FORM_CONFIRM, 
+        case 
+       when financial_month=1 then 'فروردین'
+       when financial_month=2 then 'اردیبهشت'
+       when financial_month=3 then 'خرداد'
+       when financial_month=4 then 'تیر'
+       when financial_month=5 then 'مرداد'
+       when financial_month=6 then 'شهریور'
+       when financial_month=7 then 'مهر'
+       when financial_month=8 then 'آبان'
+       when financial_month=9 then 'آذر'
+       when financial_month=10 then 'دی'
+       when financial_month=11 then 'بهمن'
+       when financial_month=12 then 'اسفند'   
+        END as financial_month, 
+       --TO_CHAR(FINAL_FUND,'FM999G999G999G999G999G999') "FINAL_FUND",
+       FINAL_FUND "FINAL_FUND",       مقدار نهایی بودجه شرکت را انتخاب می‌کند
+        main_board_number ,       این ستون شماره اصلی هیئت مدیره شرکت را انتخاب می‌کند
+      '' BOARD,      یک مقدار خالی برای "BOARD" انتخاب می‌شود.
+      '' shareholders,       یک مقدار خالی برای "shareholders" انتخاب می‌شود
+      '' assembly,             یک مقدار خالی برای "assembly" انتخاب می‌شود.
+      '' upload,                                “  “
+      '' upload_logo,                                                                      “ “
+        (:APP_PAGE_ID) as xxx,         مقدار شناسه صفحه اپلیکیشن به صورت پارامتر گرفته می‌شود.
+        (SELECT count(*) FROM saba_files See WHERE see.page_num=91 and (see.PAGE_ID||see.OBJECT_ID)=(b.ID||b.ID)) as test1, 
+        DECODE((SELECT count(*) FROM saba_files See WHERE see.page_num=91 and see.PAGE_ID||see.OBJECT_ID=b.ID||b.ID), 0, 'fa fa-upload', 'fa fa-check-square green-fa') as icon1, 
+        (SELECT count(*) FROM SABA_COMPANY_LOGOS See WHERE see.COMPANY_ID = b.ID) as test2,
+        DECODE((SELECT count(*) FROM SABA_COMPANY_LOGOS See WHERE see.COMPANY_ID = b.ID), 0, 'fa fa-upload', 'fa fa-check-square green-fa') as icon2, 
+         ADDRESS,                                  این ستون آدرس شرکت را انتخاب می‌کند.--      
+        CREATE_DATE,                                           “   “
+        -- cast(TO_CHAR(CREATE_DATE,'YYYY/MM/DD','NLS_CALENDAR=PERSIAN') as varchar(255)) t3,
+         --TO_CHAR(CREATE_DATE, 'YYYY', 'NLS_CALENDAR=PERSIAN') cd,  
+         REGISTER_PLACE,                   این ستون محل ثبت شرکت را انتخاب می‌کند--
+      '' MEMBERS,                               “      “
+      '' PROJECTS,                                                   “ “
+         holding_name,                                “     “
+         postal_code,               “  “
+        (select dd.loc_name from saba_location dd  where dd.id=b.province)province ,                   
+        (select dd.loc_name from saba_location dd  where dd.id=b.city)city  ,
+        case
+        when central_office='0' then'ندارد'
+        when central_office='1' then'ندارد' 
+        end as central_office,  
+        website,  این ستون وب‌سایت شرکت را انتخاب می‌کند. 
+        phone,
+        ''HISTORY,    یک مقدار خالی برای "HISTORY" انتخاب می‌شود.
+        ''FORM_CONFIRM_USER,
+        TO_CHAR(INITIAL_FUND,'FM999G999G999G999G999G999') "INITIAL_FUND",   این ستون بودجه اولیه را با فرمت
+        case
+        when bourse_status=1 then 'عدم ثبت نزد سازمان'
+        when bourse_status=2 then 'پذیرفته شده در بورس تهران'
+        when bourse_status=3 then 'پذیرفته شده در فرابورس ایران'
+        when bourse_status=4 then 'ثبت شده پذیرفته نشده' end bourse_status,
+        TO_CHAR(SHARE_PRICE,'FM999G999G999G999') "SHARE_PRICE",    این ستون بودجه اولیه را با فرمت خاص نمایش می‌دهد. case
+        HOLDING_SHARE_PART || '%'           درصد سهم هولدینگ را نمایش می‌دهد. 
+        from SABA_COMPANY b                              داده‌ها از جدول `SABA_COMPANY` بازیابی می‌شود.
+        WHERE (:P_COMPANY_ID IS NULL OR b.ID=:P_COMPANY_ID) 
+
+query explanation:
+select  ID,  -- این ستون ID شرکت را انتخاب می‌کند.
+        NAME,  -- این ستون نام شرکت را انتخاب می‌کند.
+        REGISTER_NUMBER,  -- این ستون شماره ثبت شرکت را انتخاب می‌کند.
+        national_code,  -- این ستون کد ملی شرکت را انتخاب می‌کند.
+این بخش‌ها مقادیر پایه‌ای از جدول SABA_COMPANY برای هر رکورد (شرکت) انتخاب می‌کنند.
+
+این کوئری به طور کلی برای نمایش اطلاعات مختلف درباره شرکت‌ها و وضعیت‌های مختلف آن‌ها در سیستم طراحی شده است.
+
+
+
+       case
+       when ACTIVITY_TYPE=1 then 'تولیدی'
+       when ACTIVITY_TYPE=2 then 'خدماتی'
+       when ACTIVITY_TYPE=3 then 'سرمایه گذاری'
+       when ACTIVITY_TYPE=4 then 'پیمانکاری'
+       when ACTIVITY_TYPE=5 then 'موسسه حقوقی'
+       when ACTIVITY_TYPE=6 then 'موسسه آموزشی'
+       when ACTIVITY_TYPE=7 then 'فعالیت بیمه ای'
+       when ACTIVITY_TYPE=8 then 'بازرگانی'
+       end ACTIVITY_TYPE
+در اینجا، با استفاده از دستور CASE نوع فعالیت شرکت بر اساس مقدار ACTIVITY_TYPE تعیین می‌شود. این مقادیر از 1 تا 8 درنظر گرفته می‌شود که هر کدام به نوع خاصی از فعالیت‌ها اشاره دارند.
+       DECODE(company_type, 1, 'سهامی خاص', 
+           2,'سهامی عام',
+        3,'تضامنی',
+        4,'نسبی',
+        5,'تعاونی',
+        6,'مختلط',
+        7,'موسسه')
+        company_type,
+این بخش از دستور DECODE برای ترجمه کد company_type به نوع دقیق شرکت استفاده می‌شود. برای مثال، اگر company_type برابر 1 باشد، به معنی "سهامی خاص" است.
+        financial_day,  -- این ستون روز مالی شرکت را انتخاب می‌کند.
+
+query:   این کوئری اطلاعاتی در مورد سهام‌داران شرکت‌ها از جدول‌های مختلف استخراج می‌کند و براساس تعداد سهام مرتب‌سازی می‌کند. خط به خط کد به شرح زیر است:
+select 
+   s.name c_name,
+   n.name,
+  -- ''CONFIRM_ADMIN,
+  -- ''CONFIRM_USER,
+--    CASE 
+--        WHEN M.FORM_CONFIRM is null THEN '-'
+--        WHEN M.FORM_CONFIRM=26 then 'منتظر رسیدگی'
+--        WHEN M.FORM_CONFIRM=27 then 'تایید شده'
+--        WHEN M.FORM_CONFIRM=28 then ' رد شده'
+--        END as CONFIRMM, 
+--s.name company_name,
+   n.NATIONAL_ID NATIONAL_CODE,
+   mt.type,
+   TO_CHAR(m.NUMBER_OF_SHARES,'FM999G999G999G999G999G999') "m.NUMBER_OF_SHARES",
+  -- m.NUMBER_OF_SHARES,
+  -- '' status,
+   m.id shid
+   from SABA_SHAREHOLDERS m, saba_person n ,saba_company s , member_type mt
+   where m.NAME_ID=n.id
+   and m.COMPANY_ID=s.id
+   and mt.type_num=n.type
+   and  (:P37_newone is null or m.company_id= :P37_newone)
+   and  (:P37_SHARE_CHART is null or m.company_id = :P37_SHARE_CHART)
+   and  (:P37_SHARE_CHART02 is null or m.name_id = :P37_SHARE_CHART02)
+   AND (:P_COMPANY_ID IS NULL OR M.COMPANY_ID=:P_COMPANY_ID)
+   ORDER BY NUMBER_OF_SHARES DESC
+CASE :عبارت CASE در SQL و PL/SQL برای اجرای منطق شرطی استفاده می‌شود 
+:P37_SHARE
+این پارامتر می‌تواند مقداری را از رابط کاربری (مانند یک فیلد جستجو، منو کشویی، یا فیلتر) دریافت کند.
+مقدار پارامتر مشخص می‌کند که کوئری چگونه داده‌ها را محدود کند.
+   m.id shid:
+به این معناست که ستون id از جدول SABA_SHAREHOLDERS (با نام مستعار m) انتخاب می‌شود و به آن یک نام مستعار (Alias) به نام shid داده می‌شود.
+این کوئری SQL اطلاعات مختلفی از سه جدول مختلف (سهم‌داران، افراد، شرکت‌ها و نوع عضویت‌ها) می‌گیرد و از آن‌ها برای نمایش نتایج استفاده می‌کند.
+
+تحلیل خط به خط کد:
+
+s.name c_name: از جدول saba_company، ستون name را انتخاب می‌کند و به آن نام مستعار c_name می‌دهد. این ستون احتمالاً نام شرکت را نمایش می‌دهد.
+n.name: از جدول saba_person، ستون name را انتخاب می‌کند که نام شخص را نشان می‌دهد.
+n.NATIONAL_ID NATIONAL_CODE: از جدول saba_person، ستون NATIONAL_ID را به نام NATIONAL_CODE نمایش می‌دهد. این احتمالاً کد ملی فرد است.
+mt.type: از جدول member_type، ستون type را به‌عنوان نوع عضویت فرد انتخاب می‌کند.
+TO_CHAR(m.NUMBER_OF_SHARES, 'FM999G999G999G999G999G999') "m.NUMBER_OF_SHARES": از جدول SABA_SHAREHOLDERS، ستون NUMBER_OF_SHARES را به فرمت عددی خاصی تبدیل می‌کند تا هزارگان به طور مناسب نمایش داده شوند.
+m.id shid: از جدول SABA_SHAREHOLDERS، ستون id را به‌عنوان شناسه سهام‌دار انتخاب می‌کند و به آن نام مستعار shid می‌دهد.
+جداول مورد استفاده:
+
+جدول‌ها شامل SABA_SHAREHOLDERS (که به‌عنوان m شناخته می‌شود)، saba_person (که به‌عنوان n شناخته می‌شود)، saba_company (که به‌عنوان s شناخته می‌شود) و member_type (که به‌عنوان mt شناخته می‌شود) هستند.
+شرایط اتصال (Joins):
+
+m.NAME_ID = n.id: این اتصال بین جدول SABA_SHAREHOLDERS و saba_person است، یعنی رکوردهایی که شناسه فرد (NAME_ID) در SABA_SHAREHOLDERS با شناسه فرد در saba_person برابر باشد، با هم مرتبط می‌شوند.
+m.COMPANY_ID = s.id: این اتصال بین جدول SABA_SHAREHOLDERS و saba_company است، یعنی رکوردهایی که شناسه شرکت (COMPANY_ID) در SABA_SHAREHOLDERS با شناسه شرکت در saba_company برابر باشد، به هم متصل می‌شوند.
+mt.type_num = n.type: این اتصال بین جدول member_type و saba_person است، یعنی رکوردهایی که نوع عضویت (type_num) در جدول member_type با نوع فرد (type) در saba_person برابر باشد، با هم مرتبط می‌شوند.
+شرایط فیلتر (WHERE):
+
+(:P37_newone IS NULL OR m.company_id = :P37_newone): اگر پارامتر :P37_newone خالی نباشد، رکوردهایی که company_id برابر با این پارامتر باشد، انتخاب می‌شوند.
+(:P37_SHARE_CHART IS NULL OR m.company_id = :P37_SHARE_CHART): اگر پارامتر :P37_SHARE_CHART خالی نباشد، رکوردهایی که company_id برابر با این پارامتر باشد، انتخاب می‌شوند.
+(:P37_SHARE_CHART02 IS NULL OR m.name_id = :P37_SHARE_CHART02): اگر پارامتر :P37_SHARE_CHART02 خالی نباشد، رکوردهایی که name_id برابر با این پارامتر باشد، انتخاب می‌شوند.
+(:P_COMPANY_ID IS NULL OR M.COMPANY_ID = :P_COMPANY_ID): اگر پارامتر :P_COMPANY_ID خالی نباشد، رکوردهایی که COMPANY_ID برابر با این پارامتر باشد، انتخاب می‌شوند.
+ترتیب نتایج:
+
+ORDER BY NUMBER_OF_SHARES DESC: نتایج به‌طور نزولی (از بیشترین به کمترین) بر اساس ستون NUMBER_OF_SHARES مرتب می‌شوند.
+قسمت‌های کامنت شده:
+
+بخش‌هایی از کوئری که کامنت شده‌اند، در حال حاضر اجرا نمی‌شوند. این بخش‌ها شامل ستون‌های اضافی مانند وضعیت تایید (CONFIRM_ADMIN, CONFIRM_USER, و CONFIRMM) هستند که اگر فعال شوند، وضعیت‌های مختلف تایید را بر اساس مقدار ستون FORM_CONFIRM در جدول SABA_SHAREHOLDERS نمایش می‌دهند.
+همچنین، نام شرکت و وضعیت به‌عنوان ستون‌های اضافی می‌توانستند نمایش داده شوند که در حال حاضر غیرفعال هستند.
+
+query:(2)
+select 
+c.id,
+   spp.name,
+    case when member_type=1 then 'حقیقی'
+   when  member_type=2 then 'حقوقی'
+   end member_type,
+   C.NATIONAL_CODE,
+   SP.NAME NAT_NAME,
+   (:APP_PAGE_ID) as xxx,
+   SP.NATIONAL_ID,
+   case
+       when POSITION=1 then 'عضو هیئت مدیره اصلی'
+      when POSITION=2 then 'عضو هیئت مدیره علی البدل'
+       when POSITION=3 then 'مدیر عامل'
+       when POSITION=4 then 'نائب رئیس هیئت مدیره'
+        when POSITION=5 then 'رئیس هیئت مدیره'
+       when POSITION=6 then 'مدیرعامل و رئیس هیئت مدیره'
+       when POSITION=7 then 'مدیرعامل و نائب رئیس هیئت مدیره'
+       WHEN POSITION=8 then ' مدیرعامل و عضو هیئت مدیره'
+       
+       end POSITION,
+       cast(TO_CHAR(JOIN_DATE,'YYYY/MM/DD','NLS_CALENDAR=PERSIAN') as varchar(255)) JOIN_DATE,
+       cast(TO_CHAR(ejection_date,'YYYY/MM/DD','NLS_CALENDAR=PERSIAN') as varchar(255)) ejection_date,
+       CASE WHEN STATUS=2 THEN 'غیر فعال' WHEN STATUS=1 THEN 'فعال' END STATUS,
+       c.name namee,
+       case 
+       when FILE_STATUS is Null then 'فایلی آپلود نشده'
+       when FILE_STATUS=30 then 'فایل آپلود شده است'   
+       end
+       FILE_STATUS,
+       --DECODE(NVL(FILE_STATUS, 'null'), 'null', 'fa fa-upload', 'fa fa-check-circle') icon,
+      --(SELECT TAGS FROM SABA_FILES SEE WHERE SEE.page_num=35 AND see.PAGE_ID||see.OBJECT_ID=V.ID||V.COMPANY_ID) AS TAGS,
+       DECODE((SELECT count(*) FROM saba_files See WHERE see.page_num=35 and see.PAGE_ID||see.OBJECT_ID=V.ID||c.ID ), 0, 'fa fa-upload', 'fa fa-check-square green-fa') as icon,
+       V.ASSEMBLY_DATE, 
+       '' RESUME, 
+       v.id vid,
+       V.FORM_CONFIRM,
+       ''CONFIRM
+from SABA_BOARD v 
+left join saba_shareholders ssh on v.shareholder_id= ssh.id 
+left join saba_company c on c.id=ssh.COMPANY_ID 
+left join saba_person sp on v.name_id=sp.id  and sp.type=1
+left join saba_person spp on ssh.name_id=spp.id
+WHERE (:P_COMPANY_ID IS NULL OR c.ID=:P_COMPANY_ID)
+and   (:P35_NEWBOARD is null or v.company_id= :P35_NEWBOARD)
+1.	
+o	c.id: شناسه شرکت از جدول SABA_COMPANY (با نام مستعار c) انتخاب می‌شود.
+o	spp.name: نام شخص از جدول saba_person که برای سهام‌دار استفاده می‌شود و نام مستعار spp دارد.
+o	CASE: با توجه به مقدار member_type (نوع عضویت)، یک انتخاب صورت می‌گیرد:
+	اگر member_type برابر با 1 باشد، خروجی 'حقیقی' است.
+	اگر member_type برابر با 2 باشد، خروجی 'حقوقی' است.
+o	:C.NATIONAL_CODE کد ملی شرکت از جدول SABA_COMPANY (با نام مستعار C) نمایش داده می‌شود.
+o	: SP.NAME AS NAT_NAMEنام شخص از جدول saba_person که به‌عنوان نماینده یا عضو هیئت‌مدیره شناخته می‌شود.
+o	(:APP_PAGE_ID) AS xxx : پارامتر ورودی APP_PAGE_ID به‌طور مستقیم در کوئری قرار گرفته است و به نام مستعار xxx نمایش داده می‌شود.
+o	SP.NATIONAL_ID: کد ملی فرد از جدول saba_person که به‌عنوان نماینده یا عضو هیئت‌مدیره در نظر گرفته می‌شود.
+o	CASE: وضعیت شغلی اعضای هیئت‌مدیره بر اساس مقدار POSITION:
+	اگر POSITION = 1 باشد، نتیجه 'عضو هیئت مدیره اصلی' است.
+	اگر POSITION = 2 باشد، نتیجه 'عضو هیئت مدیره علی‌البدل' است.
+	برای سایر مقادیر مشابه، عنوان شغلی مربوطه به اعضای هیئت‌مدیره نمایش داده می‌شود.
+o	CAST(TO_CHAR(JOIN_DATE, 'YYYY/MM/DD', 'NLS_CALENDAR=PERSIAN') AS VARCHAR(255)) AS JOIN_DATE: تاریخ پیوستن فرد به هیئت‌مدیره به فرمت تاریخ هجری شمسی تبدیل شده و به‌صورت رشته نمایش داده می‌شود.
+o	CAST(TO_CHAR(ejection_date, 'YYYY/MM/DD', 'NLS_CALENDAR=PERSIAN') AS VARCHAR(255)) AS ejection_date: تاریخ اخراج یا خروج فرد از هیئت‌مدیره به فرمت تاریخ هجری شمسی تبدیل شده و به‌صورت رشته نمایش داده می‌شود.
+o	CASE: وضعیت فرد را بر اساس STATUS نمایش می‌دهد:
+	اگر STATUS = 2 باشد، نتیجه 'غیر فعال' است.
+	اگر STATUS = 1 باشد، نتیجه 'فعال' است.
+o	C.NAME AS namee: نام شرکت از جدول SABA_COMPANY انتخاب می‌شود.
+o	CASE: وضعیت فایل‌ها بر اساس FILE_STATUS:
+	اگر FILE_STATUS خالی باشد، نتیجه 'فایلی آپلود نشده' است.
+	اگر FILE_STATUS = 30 باشد، نتیجه 'فایل آپلود شده است' است.
+o	DECODE: بررسی می‌کند که آیا فایل‌های مرتبط با هیئت‌مدیره در سیستم وجود دارد یا خیر. اگر وجود نداشته باشد، آیکن 'fa fa-upload' نمایش داده می‌شود و اگر وجود داشته باشد، آیکن 'fa fa-check-square green-fa' نمایش داده می‌شود.
+o	V.ASSEMBLY_DATE: تاریخ مجمع از جدول SABA_BOARD انتخاب می‌شود.
+o	'' AS RESUME: یک ستون خالی (رشته خالی) به نام RESUME اضافه می‌شود.
+o	V.ID AS vid: شناسه هیئت‌مدیره از جدول SABA_BOARD به نام مستعار vid انتخاب می‌شود.
+o	V.FORM_CONFIRM: ستون FORM_CONFIRM از جدول SABA_BOARD نمایش داده می‌شود. این معمولاً وضعیت تایید یا تأییدیه‌ای است که برای هر فرد ثبت می‌شود.
+o	'' AS CONFIRM: یک ستون خالی (رشته خالی) به نام CONFIRM اضافه می‌شود.
+2.	جداول مورد استفاده:
+o	جدول‌ها شامل SABA_BOARD (با نام مستعار V)، SABA_SHAREHOLDERS (با نام مستعار ssh)، SABA_COMPANY (با نام مستعار c)، و SABA_PERSON (با نام مستعار sp و spp) هستند.
+3.	شرایط اتصال (Joins):
+o	LEFT JOIN saba_shareholders ssh ON v.shareholder_id = ssh.id: اتصال جدول SABA_SHAREHOLDERS به جدول SABA_BOARD بر اساس اینکه shareholder_id در SABA_BOARD برابر با id در SABA_SHAREHOLDERS باشد.
+o	LEFT JOIN saba_company c ON c.id = ssh.COMPANY_ID: اتصال جدول SABA_COMPANY به جدول SABA_SHAREHOLDERS بر اساس اینکه COMPANY_ID در SABA_SHAREHOLDERS برابر با id در SABA_COMPANY باشد.
+o	LEFT JOIN saba_person sp ON v.name_id = sp.id AND sp.type = 1: اتصال جدول SABA_PERSON به جدول SABA_BOARD بر اساس اینکه name_id در SABA_BOARD برابر با id در SABA_PERSON باشد و نوع شخص باید 1 باشد (که احتمالاً به معنی شخص حقیقی است).
+o	LEFT JOIN saba_person spp ON ssh.name_id = spp.id: اتصال جدول SABA_PERSON دیگری به جدول SABA_SHAREHOLDERS برای دریافت نام شخص سهام‌دار.
+4.	شرایط فیلتر (WHERE):
+o	(:P_COMPANY_ID IS NULL OR c.ID = :P_COMPANY_ID): اگر پارامتر :P_COMPANY_ID خالی نباشد، تنها رکوردهایی که ID شرکت برابر با :P_COMPANY_ID باشد، انتخاب می‌شوند.
+o	(:P35_NEWBOARD IS NULL OR v.company_id = :P35_NEWBOARD): اگر پارامتر :P35_NEWBOARD خالی نباشد، تنها رکوردهایی که company_id برابر با :P35_NEWBOARD باشد، نمایش داده می‌شوند.
+نتیجه‌گیری:
+این کوئری اطلاعات مختلفی از اعضای هیئت‌مدیره، وضعیت‌های مختلف آن‌ها، تاریخ‌ها، وضعیت فایل‌ها و آیکن‌ها را از چندین جدول مرتبط استخراج می‌کند و آن‌ها را با استفاده از فیلترهای ورودی نمایش می‌دهد. این کوئری کاربردی برای نمایش اطلاعات شرکت‌ها و اعضای هیئت‌مدیره بر اساس شرایط خاص است.
+
+عبارت CAST در SQL برای تبدیل نوع داده‌ها استفاده می‌شود.
+چرا CASE مفید است؟
+•	انعطاف‌پذیری بالا برای مدیریت داده‌های شرطی.
+•	کاهش نیاز به تغییرات در کد برنامه یا لایه‌های دیگر سیستم.
+•	خوانایی بهتر و نمایش واضح‌تر داده‌ها در خروجی.
+مقایسه CAST و CONVERT:
+•	CAST: بخشی از استاندارد SQL است و در اکثر پایگاه‌های داده پشتیبانی می‌شود.
+•	CONVERT: یک تابع خاص (مثلاً در SQL Server) با قابلیت‌های پیشرفته‌تر برای تبدیل داده.
+•	
+مزیت‌های CAST نسبت به دیگر روش‌های تبدیل:
+سازگاری استاندارد: بخشی از استاندارد SQL است و در اکثر پایگاه‌های داده پشتیبانی می‌شود.
+قابلیت خوانایی بیشتر: نسبت به برخی توابع اختصاصی پایگاه داده (مانند TO_CHAR یا CONVERT) ساده‌تر است.
+انعطاف‌پذیری بالا: قابلیت تبدیل انواع داده‌های مختلف.
+
+
+select 
+
+   c.id,
+   spp.name,
+    case when member_type=1 then 'حقیقی'
+   when  member_type=2 then 'حقوقی'
+   end member_type,
+   C.NATIONAL_CODE,
+   SP.NAME NAT_NAME,
+   (:APP_PAGE_ID) as xxx,
+   SP.NATIONAL_ID,
+   case
+       when
+       POSITION=1 then 'عضو هیئت مدیره اصلی'
+       when
+       POSITION=2 then 'عضو هیئت مدیره علی البدل'
+       when
+       POSITION=3 then 'مدیر عامل'
+       when
+       POSITION=4 then 'نائب رئیس هیئت مدیره'
+       when
+       POSITION=5 then 'رئیس هیئت مدیره'
+       when
+       POSITION=6 then 'مدیرعامل و رئیس هیئت مدیره'
+       when
+       POSITION=7 then 'مدیرعامل و نائب رئیس هیئت مدیره'
+       WHEN 
+       POSITION=8 then ' مدیرعامل و عضو هیئت مدیره'
+       
+       end POSITION,
+       cast(TO_CHAR(JOIN_DATE,'YYYY/MM/DD','NLS_CALENDAR=PERSIAN') as varchar(255)) JOIN_DATE,
+       cast(TO_CHAR(ejection_date,'YYYY/MM/DD','NLS_CALENDAR=PERSIAN') as varchar(255)) ejection_date,
+       CASE WHEN STATUS=2 THEN 'غیر فعال' WHEN STATUS=1 THEN 'فعال' END STATUS,
+       c.name namee,
+       case 
+       when FILE_STATUS is Null then 'فایلی آپلود نشده'
+       when FILE_STATUS=30 then 'فایل آپلود شده است'   
+       end
+       FILE_STATUS,
+       --DECODE(NVL(FILE_STATUS, 'null'), 'null', 'fa fa-upload', 'fa fa-check-circle') icon,
+      --(SELECT TAGS FROM SABA_FILES SEE WHERE SEE.page_num=35 AND see.PAGE_ID||see.OBJECT_ID=V.ID||V.COMPANY_ID) AS TAGS,
+       DECODE((SELECT count(*) FROM saba_files See WHERE see.page_num=35 and see.PAGE_ID||see.OBJECT_ID=V.ID||c.ID ), 0, 'fa fa-upload', 'fa fa-check-square green-fa') as icon,
+       V.ASSEMBLY_DATE, 
+       '' RESUME, 
+       v.id vid,
+       V.FORM_CONFIRM,
+       ''CONFIRM
+from SABA_BOARD v 
+left join saba_shareholders ssh on v.shareholder_id= ssh.id 
+left join saba_company c on c.id=ssh.COMPANY_ID 
+left join saba_person sp on v.name_id=sp.id  and sp.type=1
+left join saba_person spp on ssh.name_id=spp.id
+WHERE (:P_COMPANY_ID IS NULL OR c.ID=:P_COMPANY_ID)
+and   (:P35_NEWBOARD is null or v.company_id= :P35_NEWBOARD)
+and v.form_confirm=1
+1.	انتخاب ستون‌ها:
+o	c.id: شناسه شرکت از جدول SABA_COMPANY که به‌طور مستقیم از SABA_SHAREHOLDERS مرتبط است.
+o	spp.name: نام شخص از جدول SABA_PERSON (که با نام مستعار spp شناخته می‌شود) که به‌عنوان سهام‌دار شناخته می‌شود.
+o	CASE WHEN member_type = 1 THEN 'حقیقی' WHEN member_type = 2 THEN 'حقوقی' END AS member_type: بر اساس مقدار member_type، نوع عضویت شخص مشخص می‌شود:
+	اگر member_type برابر با 1 باشد، 'حقیقی' (فرد حقیقی).
+	اگر member_type برابر با 2 باشد، 'حقوقی' (شخص حقوقی).
+o	C.NATIONAL_CODE: کد ملی شرکت از جدول SABA_COMPANY.
+o	SP.NAME AS NAT_NAME: نام شخص از جدول SABA_PERSON که به‌عنوان نماینده یا عضو هیئت‌مدیره شناخته می‌شود.
+o	(:APP_PAGE_ID) AS xxx: پارامتر ورودی APP_PAGE_ID به‌طور مستقیم در کوئری قرار گرفته و به نام مستعار xxx نمایش داده می‌شود.
+o	SP.NATIONAL_ID: کد ملی فرد از جدول SABA_PERSON.
+o	CASE: وضعیت شغلی اعضای هیئت‌مدیره بر اساس مقدار POSITION:
+	اگر POSITION = 1 باشد، 'عضو هیئت مدیره اصلی'.
+	اگر POSITION = 2 باشد، 'عضو هیئت مدیره علی‌البدل'.
+	برای مقادیر دیگر، عنوان شغلی مربوط به هیئت‌مدیره نمایش داده می‌شود.
+o	CAST(TO_CHAR(JOIN_DATE, 'YYYY/MM/DD', 'NLS_CALENDAR=PERSIAN') AS VARCHAR(255)) AS JOIN_DATE: تاریخ پیوستن فرد به هیئت‌مدیره به فرمت تاریخ هجری شمسی تبدیل شده و به‌صورت رشته نمایش داده می‌شود.
+o	CAST(TO_CHAR(ejection_date, 'YYYY/MM/DD', 'NLS_CALENDAR=PERSIAN') AS VARCHAR(255)) AS ejection_date: تاریخ اخراج یا خروج فرد از هیئت‌مدیره به فرمت تاریخ هجری شمسی تبدیل شده و به‌صورت رشته نمایش داده می‌شود.
+o	CASE WHEN STATUS = 2 THEN 'غیر فعال' WHEN STATUS = 1 THEN 'فعال' END AS STATUS: وضعیت فرد بر اساس مقدار STATUS:
+	اگر STATUS = 2 باشد، 'غیر فعال' است.
+	اگر STATUS = 1 باشد، 'فعال' است.
+o	C.NAME AS namee: نام شرکت از جدول SABA_COMPANY.
+o	CASE: وضعیت فایل‌ها بر اساس FILE_STATUS:
+	اگر FILE_STATUS خالی باشد، 'فایلی آپلود نشده'.
+	اگر FILE_STATUS = 30 باشد، 'فایل آپلود شده است'.
+o	DECODE((SELECT count(*) FROM saba_files See WHERE see.page_num = 35 AND see.PAGE_ID || see.OBJECT_ID = V.ID || c.ID), 0, 'fa fa-upload', 'fa fa-check-square green-fa') AS icon: بررسی وجود فایل‌های مرتبط با هیئت‌مدیره و تعیین آیکن مناسب:
+	اگر هیچ فایل مرتبطی وجود نداشته باشد، آیکن 'fa fa-upload'.
+	اگر فایل وجود داشته باشد، آیکن 'fa fa-check-square green-fa' نشان داده می‌شود.
+o	V.ASSEMBLY_DATE: تاریخ مجمع از جدول SABA_BOARD برای هیئت‌مدیره.
+o	'' AS RESUME: یک ستون خالی با نام RESUME.
+o	V.ID AS vid: شناسه هیئت‌مدیره از جدول SABA_BOARD.
+o	V.FORM_CONFIRM: وضعیت تأیید فرم (این فیلد احتمالاً نشان‌دهنده وضعیت تأیید یا رد یک درخواست است).
+o	'' AS CONFIRM: یک ستون خالی به نام CONFIRM برای نمایش اطلاعات اضافی.
+2.	جداول مورد استفاده:
+o	SABA_BOARD (با نام مستعار V): جدول اصلی که اطلاعات مربوط به هیئت‌مدیره را ذخیره می‌کند.
+o	SABA_SHAREHOLDERS (با نام مستعار ssh): جدول مربوط به سهام‌داران که اطلاعات آن‌ها به‌طور مستقیم به هیئت‌مدیره مرتبط است.
+o	SABA_COMPANY (با نام مستعار c): جدول شرکت‌ها که اطلاعات مربوط به شرکت‌ها در آن ذخیره می‌شود.
+o	SABA_PERSON (با نام مستعار sp و spp): جدول افراد که اطلاعات مربوط به اعضای هیئت‌مدیره و سهام‌داران را ذخیره می‌کند.
+3.	شرایط اتصال (Joins):
+o	LEFT JOIN saba_shareholders ssh ON v.shareholder_id = ssh.id: اتصال جدول SABA_SHAREHOLDERS به جدول SABA_BOARD بر اساس اینکه shareholder_id در SABA_BOARD برابر با id در SABA_SHAREHOLDERS باشد.
+o	LEFT JOIN saba_company c ON c.id = ssh.COMPANY_ID: اتصال جدول SABA_COMPANY به جدول SABA_SHAREHOLDERS بر اساس اینکه COMPANY_ID در SABA_SHAREHOLDERS برابر با id در SABA_COMPANY باشد.
+o	LEFT JOIN saba_person sp ON v.name_id = sp.id AND sp.type = 1: اتصال جدول SABA_PERSON به جدول SABA_BOARD بر اساس اینکه name_id در SABA_BOARD برابر با id در SABA_PERSON باشد و نوع شخص 1 باشد (که معمولاً به معنی شخص حقیقی است).
+o	LEFT JOIN saba_person spp ON ssh.name_id = spp.id: اتصال جدول SABA_PERSON دیگری به جدول SABA_SHAREHOLDERS برای دریافت نام سهام‌دار.
+4.	شرایط فیلتر (WHERE):
+o	(:P_COMPANY_ID IS NULL OR c.ID = :P_COMPANY_ID): اگر پارامتر :P_COMPANY_ID خالی نباشد، فقط رکوردهایی که ID شرکت برابر با :P_COMPANY_ID باشد، نمایش داده می‌شود.
+o	(:P35_NEWBOARD IS NULL OR v.company_id = :P35_NEWBOARD): اگر پارامتر :P35_NEWBOARD خالی نباشد، فقط رکوردهایی که company_id در جدول SABA_BOARD برابر با :P35_NEWBOARD باشد، نمایش داده می‌شود.
+o	v.form_confirm = 1: فقط رکوردهایی که FORM_CONFIRM در جدول SABA_BOARD برابر با 1 (احتمالاً نشان‌دهنده وضعیت تأیید) باشد، نمایش داده می‌شوند.
+________________________________________
+نتیجه‌گیری:
+این کوئری SQL با استفاده از داده‌های مختلف از جداول SABA_BOARD, SABA_SHAREHOLDERS, SABA_COMPANY, و SABA_PERSON، اطلاعات مختلفی از اعضای هیئت‌مدیره و سهام‌داران شرکت‌ها را استخراج می‌کند. نتایج شامل شناسه‌های شرکت، نوع عضویت، تاریخ پیوستن و خروج، وضعیت‌های مختلف، وضعیت فایل‌ها، آیکن‌ها، و سایر اطلاعات مرتبط هستند. همچنین، این کوئری از فیلترهای ورودی استفاده می‌کند تا تنها داده‌های مورد نظر نمایش داده شوند.
+
+query:(3)
+1
+select
+--rownum,
+'هلدینگ توسعه کسب و کار سبا' as holding_name,
+       sb.name,
+       sb.id coid,  
+       case 
+       when STATUS is null then 'فایلی آپلود نشده'
+       when STATUS=21 then 'فایل آپلود شده است	'   
+    --    when STATUS=3 then 'تایید'
+    --    when STATUS=4 then 'رد' 
+       end
+       STATUS,
+  case 
+       when ST.FORM_CONFIRM is null then '-'
+       when ST.FORM_CONFIRM=29 then 'منتظر رسیدگی'   
+       when ST.FORM_CONFIRM=30 then 'تایید'
+       when ST.FORM_CONFIRM=31 then 'رد' 
+       end
+       FORM_CONFIRM,
+       DECODE(NVL(STATUS, 'null'), 'null', 'fa fa-upload', 'fa fa-check-square green-fa') icon,
+       cast(TO_CHAR(APPROVAL_DATE,'YYYY/MM/DD','NLS_CALENDAR=PERSIAN') as varchar(255))APPROVAL_DATE,
+       '' upload,
+       st.id,
+       (:APP_PAGE_ID) as xxx,
+       :APP_USER as APP_US,
+      -- ''approval_status,
+        CONFIRM_DATE ,
+ (select (select a1.user_name from saba_users a1 WHERE h2.company_id=a1.company_id  and a1.status='ADMIN' )ss FROM saba_users h2 
+ WHERE 
+  h2.status='USER'
+ and upper(h2.user_name) = :APP_USER
+ and h2.company_id= sb.ID) bb,
+ (select min(sdf.id) from saba_files sdf,saba_company_statute sty where sty.id=sdf.page_id  and sty.company_id= sb.ID) vvv,
+ st.created_by,
+'' HISTORY,
+ ''USER_CONFIRM,
+ ''ADMIN_CONFIRM
+ 
+  from SABA_ORG_CHART  st 
+  left join saba_company sb on sb.id = st.company_id
+
+  where  
+    (:P_COMPANY_ID IS NULL OR company_ID=:P_COMPANY_ID)
+1.	انتخاب ستون‌ها:
+o	'هلدینگ توسعه کسب و کار سبا' AS holding_name: نام هلدینگ ثابت است که به‌طور مستقیم در کوئری وارد شده است.
+o	sb.name: نام شرکت از جدول SABA_COMPANY.
+o	sb.id AS coid: شناسه شرکت از جدول SABA_COMPANY.
+o	CASE WHEN STATUS IS NULL THEN 'فایلی آپلود نشده' WHEN STATUS = 21 THEN 'فایل آپلود شده است': وضعیت فایل‌ها بر اساس مقدار STATUS:
+	اگر STATUS برابر با NULL باشد، 'فایلی آپلود نشده'.
+	اگر STATUS = 21 باشد، 'فایل آپلود شده است'.
+o	CASE WHEN ST.FORM_CONFIRM IS NULL THEN '-' WHEN ST.FORM_CONFIRM = 29 THEN 'منتظر رسیدگی': وضعیت تأیید فرم بر اساس FORM_CONFIRM:
+	اگر FORM_CONFIRM برابر با NULL باشد، '-'.
+	اگر FORM_CONFIRM = 29 باشد، 'منتظر رسیدگی'.
+	اگر FORM_CONFIRM = 30 باشد، 'تایید'.
+	اگر FORM_CONFIRM = 31 باشد، 'رد'.
+o	DECODE(NVL(STATUS, 'null'), 'null', 'fa fa-upload', 'fa fa-check-square green-fa') AS icon: بررسی وضعیت فایل‌ها برای نمایش آیکن مناسب:
+	اگر STATUS برابر با NULL باشد، آیکن 'fa fa-upload'.
+	اگر فایل آپلود شده باشد، آیکن 'fa fa-check-square green-fa'.
+o	CAST(TO_CHAR(APPROVAL_DATE, 'YYYY/MM/DD', 'NLS_CALENDAR=PERSIAN') AS VARCHAR(255)) AS APPROVAL_DATE: تاریخ تأیید به فرمت تاریخ هجری شمسی تبدیل شده و به‌صورت رشته نمایش داده می‌شود.
+o	'' AS upload: یک ستون خالی با نام upload.
+o	st.id: شناسه رکورد از جدول SABA_ORG_CHART.
+o	(:APP_PAGE_ID) AS xxx: پارامتر ورودی APP_PAGE_ID که به‌طور مستقیم در کوئری قرار گرفته و به نام مستعار xxx نمایش داده می‌شود.
+o	:APP_USER AS APP_US: پارامتر ورودی APP_USER که به‌طور مستقیم در کوئری قرار گرفته و به نام مستعار APP_US نمایش داده می‌شود.
+o	CONFIRM_DATE: تاریخ تأیید (احتمالاً تاریخ تأیید نهایی یک فرآیند).
+o	(SELECT a1.user_name FROM saba_users a1 WHERE h2.company_id = a1.company_id AND a1.status = 'ADMIN') AS ss: نام کاربری مدیر سیستم برای شرکت مشخص شده.
+o	(SELECT MIN(sdf.id) FROM saba_files sdf, saba_company_statute sty WHERE sty.id = sdf.page_id AND sty.company_id = sb.ID) AS vvv: شناسه کمترین فایل‌های مربوط به شرکت از جدول SABA_FILES.
+o	st.created_by: نام فردی که رکورد را ایجاد کرده است.
+o	'' AS HISTORY: یک ستون خالی با نام HISTORY.
+o	'' AS USER_CONFIRM: یک ستون خالی با نام USER_CONFIRM.
+o	'' AS ADMIN_CONFIRM: یک ستون خالی با نام ADMIN_CONFIRM.
+2.	جداول مورد استفاده:
+o	SABA_ORG_CHART (st): جدول اطلاعات مربوط به ساختار سازمانی.
+o	SABA_COMPANY (sb): جدول اطلاعات شرکت‌ها.
+3.	شرایط اتصال (Joins):
+o	LEFT JOIN saba_company sb ON sb.id = st.company_id: اتصال جدول SABA_COMPANY به جدول SABA_ORG_CHART بر اساس اینکه company_id در SABA_ORG_CHART برابر با id در SABA_COMPANY باشد.
+4.	شرایط فیلتر (WHERE):
+o	(:P_COMPANY_ID IS NULL OR company_ID = :P_COMPANY_ID): اگر پارامتر P_COMPANY_ID خالی نباشد، فقط رکوردهایی که company_ID برابر با P_COMPANY_ID باشد، نمایش داده می‌شوند.
+
+2
+select
+--rownum,
+'هلدینگ توسعه کسب و کار سبا' as holding_name,
+       sb.name,
+       sb.id coid,  
+       case 
+       when STATUS is null then 'فایلی آپلود نشده'
+       when STATUS=21 then 'فایل آپلود شده است	'   
+    --    when STATUS=3 then 'تایید'
+    --    when STATUS=4 then 'رد' 
+       end
+       STATUS,
+  case 
+       when ST.FORM_CONFIRM is null then '-'
+       when ST.FORM_CONFIRM=29 then 'منتظر رسیدگی'   
+       when ST.FORM_CONFIRM=30 then 'تایید'
+       when ST.FORM_CONFIRM=31 then 'رد' 
+       end
+       FORM_CONFIRM,
+       DECODE(NVL(STATUS, 'null'), 'null', 'fa fa-upload', 'fa fa-check-square green-fa') icon,
+       cast(TO_CHAR(APPROVAL_DATE,'YYYY/MM/DD','NLS_CALENDAR=PERSIAN') as varchar(255))APPROVAL_DATE,
+       '' upload,
+       st.id,
+       (:APP_PAGE_ID) as xxx,
+       :APP_USER as APP_US,
+      -- ''approval_status,
+        CONFIRM_DATE ,
+ (select (select a1.user_name from saba_users a1 WHERE h2.company_id=a1.company_id  and a1.status='ADMIN' )ss FROM saba_users h2 
+ WHERE 
+  h2.status='USER'
+ and upper(h2.user_name) = :APP_USER
+ and h2.company_id= sb.ID) bb,
+ (select min(sdf.id) from saba_files sdf,saba_company_statute sty where sty.id=sdf.page_id  and sty.company_id= sb.ID) vvv,
+ st.created_by,
+  ''HISTORY,
+ ''USER_CONFIRM,
+ ''ADMIN_CONFIRM
+  from SABA_ORG_CHART  st 
+  left join saba_company sb on sb.id = st.company_id
+
+  where  
+    (:P_COMPANY_ID IS NULL OR company_ID=:P_COMPANY_ID) 
+and st.form_confirm in(29,30)
+order by st.form_confirm
+تحلیل قبلی+ •  شرط اضافی:
+•	and st.form_confirm in (29, 30): فقط رکوردهایی که FORM_CONFIRM در آن‌ها برابر با 29 (منتظر رسیدگی) یا 30 (تایید شده) باشد، نمایش داده می‌شود.
+•  ترتیب (ORDER BY):
+•	ORDER BY st.form_confirm: نتایج بر اساس وضعیت تأیید فرم (form_confirm) مرتب می‌شوند.
+
+3
+select
+--rownum,
+'هلدینگ توسعه کسب و کار سبا' as holding_name,
+       sb.name,
+       sb.id coid,  
+       case 
+       when STATUS is null then 'فایلی آپلود نشده'
+       when STATUS=21 then 'فایل آپلود شده است	'   
+    --    when STATUS=3 then 'تایید'
+    --    when STATUS=4 then 'رد' 
+       end
+       STATUS,
+  case 
+       when ST.FORM_CONFIRM is null then '-'
+       when ST.FORM_CONFIRM=29 then 'منتظر رسیدگی'   
+       when ST.FORM_CONFIRM=30 then 'تایید'
+       when ST.FORM_CONFIRM=31 then 'رد' 
+       end
+       FORM_CONFIRM,
+       DECODE(NVL(STATUS, 'null'), 'null', 'fa fa-upload', 'fa fa-check-square green-fa') icon,
+       cast(TO_CHAR(APPROVAL_DATE,'YYYY/MM/DD','NLS_CALENDAR=PERSIAN') as varchar(255))APPROVAL_DATE,
+       '' upload,
+       st.id,
+       (:APP_PAGE_ID) as xxx,
+       :APP_USER as APP_US,
+      -- ''approval_status,
+        CONFIRM_DATE ,
+ (select (select a1.user_name from saba_users a1 WHERE h2.company_id=a1.company_id  and a1.status='ADMIN' )ss FROM saba_users h2 
+ WHERE 
+  h2.status='USER'
+ and upper(h2.user_name) = :APP_USER
+ and h2.company_id= sb.ID) bb,
+ (select min(sdf.id) from saba_files sdf,saba_company_statute sty where sty.id=sdf.page_id  and sty.company_id= sb.ID) vvv,
+ st.created_by,
+
+ ''USER_CONFIRM,
+ ''ADMIN_CONFIRM
+  from SABA_ORG_CHART  st 
+  left join saba_company sb on sb.id = st.company_id
+
+  where  
+    (:P_COMPANY_ID IS NULL OR company_ID=:P_COMPANY_ID) 
+and st.form_confirm=30
+
+1.	'هلدینگ توسعه کسب و کار سبا' as holding_name:
+o	یک رشته ثابت ('هلدینگ توسعه کسب و کار سبا') به نام مستعار holding_name اختصاص داده می‌شود.
+2.	sb.name:
+o	نام شرکت از جدول SABA_COMPANY (با نام مستعار sb) نمایش داده می‌شود.
+3.	sb.id AS coid:
+o	شناسه شرکت (id) از جدول SABA_COMPANY به نام مستعار coid نمایش داده می‌شود.
+4.	CASE WHEN STATUS IS NULL THEN 'فایلی آپلود نشده' WHEN STATUS = 21 THEN 'فایل آپلود شده است' END STATUS:
+o	با استفاده از عبارت CASE وضعیت فایل بررسی می‌شود:
+	اگر STATUS برابر با NULL باشد، مقدار 'فایلی آپلود نشده' برمی‌گرداند.
+	اگر STATUS برابر با 21 باشد، مقدار 'فایل آپلود شده است' برمی‌گرداند.
+5.	CASE WHEN ST.FORM_CONFIRM IS NULL THEN '-' WHEN ST.FORM_CONFIRM = 29 THEN 'منتظر رسیدگی' WHEN ST.FORM_CONFIRM = 30 THEN 'تایید' WHEN ST.FORM_CONFIRM = 31 THEN 'رد' END FORM_CONFIRM:
+o	وضعیت تأیید فرم بر اساس مقدار FORM_CONFIRM از جدول SABA_ORG_CHART بررسی می‌شود:
+	اگر FORM_CONFIRM برابر با NULL باشد، مقدار '-' برمی‌گرداند.
+	اگر FORM_CONFIRM برابر با 29 باشد، مقدار 'منتظر رسیدگی' برمی‌گرداند.
+	اگر FORM_CONFIRM برابر با 30 باشد، مقدار 'تایید' برمی‌گرداند.
+	اگر FORM_CONFIRM برابر با 31 باشد، مقدار 'رد' برمی‌گرداند.
+6.	DECODE(NVL(STATUS, 'null'), 'null', 'fa fa-upload', 'fa fa-check-square green-fa') AS icon:
+o	از تابع DECODE برای تبدیل وضعیت فایل به یک آیکن استفاده می‌شود:
+	اگر STATUS برابر با NULL باشد، آیکن 'fa fa-upload' نمایش داده می‌شود.
+	در غیر این صورت آیکن 'fa fa-check-square green-fa' نمایش داده می‌شود.
+7.	CAST(TO_CHAR(APPROVAL_DATE, 'YYYY/MM/DD', 'NLS_CALENDAR=PERSIAN') AS VARCHAR(255)) AS APPROVAL_DATE:
+o	تاریخ تأیید (APPROVAL_DATE) به فرمت تاریخ هجری شمسی تبدیل شده و به‌صورت رشته نمایش داده می‌شود.
+8.	'' AS upload:
+o	یک ستون خالی با نام upload که هیچ داده‌ای ندارد.
+9.	st.id:
+o	شناسه رکورد از جدول SABA_ORG_CHART نمایش داده می‌شود.
+10.	(:APP_PAGE_ID) AS xxx:
+o	پارامتر ورودی APP_PAGE_ID به نام مستعار xxx نمایش داده می‌شود.
+11.	:APP_USER AS APP_US:
+o	پارامتر ورودی APP_USER به نام مستعار APP_US نمایش داده می‌شود.
+12.	CONFIRM_DATE:
+o	تاریخ تأیید (ممکن است تاریخ تأیید نهایی یک فرآیند باشد).
+13.	(SELECT a1.user_name FROM saba_users a1 WHERE h2.company_id = a1.company_id AND a1.status = 'ADMIN') AS ss:
+o	زیرکوئری که نام کاربری مدیر سیستم را برای شرکت مشخص شده استخراج می‌کند.
+14.	(SELECT MIN(sdf.id) FROM saba_files sdf, saba_company_statute sty WHERE sty.id = sdf.page_id AND sty.company_id = sb.ID) AS vvv:
+o	زیرکوئری برای پیدا کردن کمترین شناسه فایل‌های مربوط به شرکت از جدول SABA_FILES.
+15.	st.created_by:
+o	نام فردی که رکورد را در جدول SABA_ORG_CHART ایجاد کرده است.
+16.	'' AS USER_CONFIRM:
+o	یک ستون خالی با نام USER_CONFIRM که هیچ داده‌ای ندارد.
+17.	'' AS ADMIN_CONFIRM:
+o	یک ستون خالی با نام ADMIN_CONFIRM که هیچ داده‌ای ندارد.
+________________________________________
+جداول مورد استفاده:
+•	SABA_ORG_CHART (st): جدول اطلاعات مربوط به ساختار سازمانی.
+•	SABA_COMPANY (sb): جدول اطلاعات شرکت‌ها.
+•	SABA_USERS (h2): جدول کاربران سیستم.
+شرایط اتصال (Joins):
+•	LEFT JOIN saba_company sb ON sb.id = st.company_id: اتصال جدول SABA_COMPANY به جدول SABA_ORG_CHART بر اساس اینکه company_id در SABA_ORG_CHART برابر با id در SABA_COMPANY باشد.
+شرایط فیلتر (WHERE):
+•	(:P_COMPANY_ID IS NULL OR company_ID = :P_COMPANY_ID): اگر پارامتر P_COMPANY_ID خالی نباشد، فقط رکوردهایی که company_ID برابر با P_COMPANY_ID باشد، نمایش داده می‌شوند.
+•	and st.form_confirm = 30: فقط رکوردهایی که وضعیت FORM_CONFIRM آن‌ها برابر با 30 (تایید شده) باشد، نمایش داده می‌شود.
+نتیجه‌گیری:
+این کوئری اطلاعات مربوط به ساختار سازمانی شرکت‌ها را نمایش می‌دهد. علاوه بر این، وضعیت فایل‌ها و تأیید فرم‌ها، تاریخ‌های مختلف و سایر جزئیات مربوط به شرکت‌ها به‌طور جامع و با توجه به فیلترهای مختلف نمایش داده می‌شود. در این کوئری، فقط رکوردهایی نمایش داده می‌شوند که وضعیت تأیید فرم آن‌ها برابر با 30 (تایید شده) باشد.
+
+query:(3)
+1
+select COMPANY_ID,
+sc.name,
+case when status=1 then 'حسابرسی شده'
+when status=2 then 'حسابرسی نشده'
+when status is null then '-'
+end status,
+case 
+       when FILE_STATUS is Null then 'فایلی آپلود نشده'
+       when FILE_STATUS=31 then 'فایل آپلود شده است'   
+       --when FILE_STATUS=3 then 'تایید'
+       --when FILE_STATUS=4 then 'رد' 
+       end
+       FILE_STATUS,
+       DECODE(NVL(FILE_STATUS, 'null'), 'null', 'fa fa-upload', 'fa fa-check-square green-fa') icon,
+       --DECODE(NVL(FILE_STATUS, 'null'), 'null', 'fa fa-upload', 'fa fa-check-circle') icon,
+       sp.ID,
+        (SELECT ID FROM SABA_PERIOD_STATEMENT WHERE FIN_YEAR=sp.FIN_YEAR  AND STATUS=sp.STATUS AND PERIOD=sp.PERIOD AND SORT=2 and company_id=33) AS COMB_ID,
+       FIN_YEAR,
+       case 
+       when PERIOD=3  then 'سه ماهه'
+       when PERIOD=6  then 'شش ماهه'
+       when PERIOD=9  then 'نه ماهه'
+       when PERIOD=12  then 'سالانه'
+       when PERIOD is null then '-'
+       end PERIOD,
+        case 
+        when STATE_COMMENT=1  then 'مقبول'
+        when STATE_COMMENT=2  then 'مشروط'
+        when STATE_COMMENT=3  then  'مردود'
+        when STATE_COMMENT=4  then 'عدم اظهار نظر'
+        when STATE_COMMENT is null then '-'
+       end STATE_COMMENT,
+       case 
+       when RENEW=1 then  'دارد'
+       when RENEW=2 then 'ندارد'
+       when RENEW is null then '-'
+       end RENEW,
+       ''CONF,
+       CASE 
+       WHEN sp.FORM_CONFIRM is null THEN '-'
+       WHEN sp.FORM_CONFIRM=10 then 'منتظر رسیدگی'
+       WHEN sp.FORM_CONFIRM=2 then 'تایید شده'
+       WHEN sp.FORM_CONFIRM=3 then ' رد شده'
+       END as FORM_CONFIRMM,
+       TYPE,
+       CREATED_USER,
+       ''FORM_CONFIRM_ADMIN,
+      -- ''update_row,
+       case 
+       when sort is null then 'اصلی'
+       when sort=1 then 'اصلی'
+       when sort=2 then 'تلفیقی'
+       end sort,
+    --   case when confirm=1 then 'تایید شده'
+    --    when confirm=2 then 'رد شده'
+    --    when confirm is null then 'فایلی آپلود نشده است'
+    --     when confirm=10 then 'در حال بررسی ...'
+    --    end confirm,
+       '' BENEFIT_LOSS,
+       '' COMB_BENEFIT_LOSS,
+       '' FINANCIAL_REPORT,
+       '' COMB_FINANCIAL_REPORT,
+       '' CASH_FLOW,
+       '' COMB_CASH_FLOW,
+       '' NEW_BENEFIT_LOSS,
+       '' COMB_NEW_BENEFIT_LOSS,
+        (:APP_PAGE_ID) as xxx,
+        :APP_USER as APP_US,
+        '' files,
+        ''HISTORY,
+        --   CASE 
+--    WHEN sp.UPDATED IS NULL THEN 
+--        (SELECT MAX(TO_CHAR(sdf.updated,'YYYY/MM/DD','NLS_CALENDAR=persian')) 
+--         FROM saba_files sdf, saba_period_statement sty 
+--         WHERE sdf.page_id = sty.id AND sty.company_id = sdf.object_id)
+--    ELSE 
+--        TO_CHAR(sp.UPDATED,'YYYY/MM/DD','NLS_CALENDAR=persian')
+-- END AS rr,
+        (select (select a1.user_name from saba_users a1 WHERE h2.company_id=a1.company_id  and a1.status='POWER_USER' )ss FROM saba_users h2 
+ WHERE 
+  h2.status='USER'
+ and upper(h2.user_name) = :APP_USER
+ and h2.company_id= sc.ID) bb,
+ (select min(sdf.id) from saba_files sdf,saba_period_statement sty where sty.id=sdf.page_id  and sty.company_id=sc.ID) vvv
+       
+  from SABA_PERIOD_STATEMENT sp
+  left join saba_company sc on sp.company_id=sc.id
+  where (sp.SORT=1 OR sp.SORT IS NULL) AND PERIOD<13  AND
+ (:P_COMPANY_ID IS NULL OR company_ID=:P_COMPANY_ID) 
+ and type=1
+1.	'هلدینگ توسعه کسب و کار سبا' AS holding_name:
+o	یک رشته ثابت 'هلدینگ توسعه کسب و کار سبا' به نام مستعار holding_name اختصاص داده می‌شود.
+2.	sc.name:
+o	نام شرکت از جدول SABA_COMPANY (با نام مستعار sc) نمایش داده می‌شود.
+3.	CASE WHEN status = 1 THEN 'حسابرسی شده' WHEN status = 2 THEN 'حسابرسی نشده' WHEN status IS NULL THEN '-' END status:
+o	با استفاده از عبارت CASE، وضعیت حسابرسی نمایش داده می‌شود:
+	اگر status برابر با 1 باشد، 'حسابرسی شده' نمایش داده می‌شود.
+	اگر status برابر با 2 باشد، 'حسابرسی نشده' نمایش داده می‌شود.
+	اگر status برابر با NULL باشد، '-' نمایش داده می‌شود.
+4.	CASE WHEN FILE_STATUS IS NULL THEN 'فایلی آپلود نشده' WHEN FILE_STATUS = 31 THEN 'فایل آپلود شده است' END FILE_STATUS:
+o	وضعیت فایل با استفاده از CASE بررسی می‌شود:
+	اگر FILE_STATUS برابر با NULL باشد، 'فایلی آپلود نشده' نمایش داده می‌شود.
+	اگر FILE_STATUS برابر با 31 باشد، 'فایل آپلود شده است' نمایش داده می‌شود.
+5.	DECODE(NVL(FILE_STATUS, 'null'), 'null', 'fa fa-upload', 'fa fa-check-square green-fa') icon:
+o	از تابع DECODE برای نمایش آیکن مناسب بر اساس وضعیت فایل استفاده می‌شود:
+	اگر FILE_STATUS برابر با NULL باشد، آیکن 'fa fa-upload' نمایش داده می‌شود.
+	در غیر این صورت آیکن 'fa fa-check-square green-fa' نمایش داده می‌شود.
+6.	sp.ID:
+o	شناسه رکورد از جدول SABA_PERIOD_STATEMENT نمایش داده می‌شود.
+7.	(SELECT ID FROM SABA_PERIOD_STATEMENT WHERE FIN_YEAR = sp.FIN_YEAR AND STATUS = sp.STATUS AND PERIOD = sp.PERIOD AND SORT = 2 AND company_id = 33) AS COMB_ID:
+o	زیرکوئری برای پیدا کردن شناسه ترکیبی بر اساس فیلترهای مختلف (سال مالی، وضعیت، دوره، نوع و شناسه شرکت).
+8.	FIN_YEAR:
+o	سال مالی از جدول SABA_PERIOD_STATEMENT نمایش داده می‌شود.
+9.	CASE WHEN PERIOD = 3 THEN 'سه ماهه' WHEN PERIOD = 6 THEN 'شش ماهه' WHEN PERIOD = 9 THEN 'نه ماهه' WHEN PERIOD = 12 THEN 'سالانه' WHEN PERIOD IS NULL THEN '-' END PERIOD:
+o	با استفاده از عبارت CASE، دوره (PERIOD) به شکل قابل فهم تبدیل می‌شود:
+	3 ماهه به 'سه ماهه' تبدیل می‌شود.
+	6 ماهه به 'شش ماهه' تبدیل می‌شود.
+	9 ماهه به 'نه ماهه' تبدیل می‌شود.
+	12 ماهه به 'سالانه' تبدیل می‌شود.
+	اگر PERIOD برابر با NULL باشد، '-' نمایش داده می‌شود.
+10.	CASE WHEN STATE_COMMENT = 1 THEN 'مقبول' WHEN STATE_COMMENT = 2 THEN 'مشروط' WHEN STATE_COMMENT = 3 THEN 'مردود' WHEN STATE_COMMENT = 4 THEN 'عدم اظهار نظر' WHEN STATE_COMMENT IS NULL THEN '-' END STATE_COMMENT:
+o	وضعیت نظر (STATE_COMMENT) با استفاده از CASE به وضعیت‌های قابل فهم تبدیل می‌شود:
+	1 به 'مقبول' تبدیل می‌شود.
+	2 به 'مشروط' تبدیل می‌شود.
+	3 به 'مردود' تبدیل می‌شود.
+	4 به 'عدم اظهار نظر' تبدیل می‌شود.
+	اگر STATE_COMMENT برابر با NULL باشد، '-' نمایش داده می‌شود.
+11.	CASE WHEN RENEW = 1 THEN 'دارد' WHEN RENEW = 2 THEN 'ندارد' WHEN RENEW IS NULL THEN '-' END RENEW:
+o	وضعیت تمدید (RENEW) با استفاده از CASE به وضعیت‌های قابل فهم تبدیل می‌شود:
+	1 به 'دارد' تبدیل می‌شود.
+	2 به 'ندارد' تبدیل می‌شود.
+	اگر RENEW برابر با NULL باشد، '-' نمایش داده می‌شود.
+12.	'' AS CONF:
+o	یک ستون خالی با نام CONF که هیچ داده‌ای ندارد.
+13.	CASE WHEN sp.FORM_CONFIRM IS NULL THEN '-' WHEN sp.FORM_CONFIRM = 10 THEN 'منتظر رسیدگی' WHEN sp.FORM_CONFIRM = 2 THEN 'تایید شده' WHEN sp.FORM_CONFIRM = 3 THEN 'رد شده' END AS FORM_CONFIRMM:
+o	وضعیت تأیید فرم (FORM_CONFIRM) به یکی از وضعیت‌های 'منتظر رسیدگی'، 'تایید شده' یا 'رد شده' تبدیل می‌شود.
+14.	TYPE:
+o	نوع (TYPE) از جدول SABA_PERIOD_STATEMENT نمایش داده می‌شود.
+15.	CREATED_USER:
+o	کاربری که رکورد را ایجاد کرده است.
+16.	'' AS FORM_CONFIRM_ADMIN:
+o	یک ستون خالی با نام FORM_CONFIRM_ADMIN که هیچ داده‌ای ندارد.
+17.	CASE WHEN sort IS NULL THEN 'اصلی' WHEN sort = 1 THEN 'اصلی' WHEN sort = 2 THEN 'تلفیقی' END sort:
+o	وضعیت sort به یکی از دو مقدار 'اصلی' یا 'تلفیقی' تبدیل می‌شود.
+18.	'' AS BENEFIT_LOSS, '' AS COMB_BENEFIT_LOSS, '' AS FINANCIAL_REPORT, '' AS COMB_FINANCIAL_REPORT, '' AS CASH_FLOW, '' AS COMB_CASH_FLOW, '' AS NEW_BENEFIT_LOSS, '' AS COMB_NEW_BENEFIT_LOSS:
+o	ستون‌های مختلفی که به صورت خالی نمایش داده می‌شوند.
+19.	(:APP_PAGE_ID) AS xxx, :APP_USER AS APP_US:
+o	پارامترهای ورودی APP_PAGE_ID و APP_USER به نام‌های مستعار xxx و APP_US نمایش داده می‌شوند.
+20.	'' AS FILES:
+o	یک ستون خالی با نام FILES.
+21.	'' AS HISTORY:
+o	یک ستون خالی با نام HISTORY.
+22.	(SELECT a1.user_name FROM saba_users a1 WHERE h2.company_id = a1.company_id AND a1.status = 'POWER_USER') ss:
+o	زیرکوئری که نام کاربری مدیر شرکت با وضعیت POWER_USER را استخراج می‌کند.
+23.	(SELECT MIN(sdf.id) FROM saba_files sdf, saba_period_statement sty WHERE sty.id = sdf.page_id AND sty.company_id = sc.ID) vvv:
+o	زیرکوئری که شناسه کمترین فایل مرتبط با شرکت را از جدول SABA_FILES استخراج می‌کند.
+جداول مورد استفاده:
+•	SABA_PERIOD_STATEMENT (sp): جدول اطلاعات مربوط به صورت‌ حساب‌های دوره‌ای.
+•	SABA_COMPANY (sc): جدول اطلاعات شرکت‌ها.
+•	SABA_USERS (h2): جدول کاربران سیستم.
+شرایط اتصال (Joins):
+•	LEFT JOIN saba_company sc ON sp.company_id = sc.id: اتصال جدول SABA_COMPANY به جدول SABA_PERIOD_STATEMENT بر اساس اینکه company_id در SABA_PERIOD_STATEMENT برابر با id در SABA_COMPANY باشد.
+شرایط فیلتر (WHERE):
+•	(:P_COMPANY_ID IS NULL OR company_ID = :P_COMPANY_ID): اگر پارامتر P_COMPANY_ID خالی نباشد، فقط رکوردهایی که company_ID برابر با P_COMPANY_ID باشد، نمایش داده می‌شوند.
+•	AND sp.SORT = 1 OR sp.SORT IS NULL AND PERIOD < 13: رکوردهایی که SORT برابر با 1 یا NULL باشد و PERIOD کمتر از 13 (ماه‌ها) باشد.
+•	AND type = 1: فقط رکوردهایی که نوع آنها برابر با 1 باشد، نمایش داده می‌شود.
+نتیجه‌گیری:
+این کوئری برای استخراج اطلاعات مربوط به صورت‌ حساب‌های دوره‌ای شرکت‌ها طراحی شده است. وضعیت‌های مختلف فایل‌ها، تأییدها و سایر جزئیات مالی و حسابرسی برای شرکت‌های مختلف در سال‌های مالی مختلف نمایش داده می‌شود.
+
+2
+select COMPANY_ID,
+sc.name,
+case when status=1 then 'حسابرسی شده'
+when status=2 then 'حسابرسی نشده'
+when status is null then '-'
+end status,
+case 
+       when FILE_STATUS is Null then 'فایلی آپلود نشده'
+       when FILE_STATUS=31 then 'فایل آپلود شده است'   
+       --when FILE_STATUS=3 then 'تایید'
+       --when FILE_STATUS=4 then 'رد' 
+       end
+       FILE_STATUS,
+       DECODE(NVL(FILE_STATUS, 'null'), 'null', 'fa fa-upload', 'fa fa-check-square green-fa') icon,
+       sp.ID,
+        (SELECT ID FROM SABA_PERIOD_STATEMENT WHERE FIN_YEAR=sp.FIN_YEAR AND PERIOD=sp.PERIOD AND SORT=2 and company_id=33) AS COMB_ID,
+       FIN_YEAR,
+       case 
+       when PERIOD=3  then 'سه ماهه'
+       when PERIOD=6  then 'شش ماهه'
+       when PERIOD=9  then 'نه ماهه'
+       when PERIOD=12  then 'سالانه'
+       when PERIOD is null then '-'
+       end PERIOD,
+        case 
+        when STATE_COMMENT=1  then 'مقبول'
+        when STATE_COMMENT=2  then 'مشروط'
+        when STATE_COMMENT=3  then  'مردود'
+        when STATE_COMMENT=4  then 'عدم اظهار نظر'
+        when STATE_COMMENT is null then '-'
+       end STATE_COMMENT,
+       case 
+       when RENEW=1 then  'دارد'
+       when RENEW=2 then 'ندارد'
+       when RENEW is null then '-'
+       end RENEW,
+       ''CONF,
+       CASE 
+       WHEN sp.FORM_CONFIRM is null then '<span style="color: grey ;">-</span>'
+       WHEN sp.FORM_CONFIRM=10 then '<span style="color: grey;">منتظر رسیدگی</span>'
+       WHEN sp.FORM_CONFIRM=2 then '<span a-IRR-table tr td mm style="color: grey; ">تایید شده</span>'
+       WHEN sp.FORM_CONFIRM=3 then '<span style="color: grey;">رد شده</span>'
+       END as FORM_CONFIRMM,
+       TYPE,
+       CREATED_USER,
+       ''FORM_CONFIRM_ADMIN,
+      -- ''update_row,
+       case 
+       when sort is null then 'اصلی'
+       when sort=1 then 'اصلی'
+       when sort=2 then 'تلفیقی'
+       end sort,
+       '' BENEFIT_LOSS,
+       '' COMB_BENEFIT_LOSS,
+       '' FINANCIAL_REPORT,
+       '' COMB_FINANCIAL_REPORT,
+       '' CASH_FLOW,
+       '' COMB_CASH_FLOW,
+       '' NEW_BENEFIT_LOSS,
+       '' COMB_NEW_BENEFIT_LOSS,
+        (:APP_PAGE_ID) as xxx,
+        :APP_USER as APP_US,
+        '' files,
+        ''HISTORY,
+        (select (select a1.user_name from saba_users a1 WHERE h2.company_id=a1.company_id  and a1.status='POWER_USER' )ss FROM saba_users h2 
+ WHERE 
+  h2.status='USER'
+ and upper(h2.user_name) = :APP_USER
+ and h2.company_id= sc.ID) bb,
+ (select min(sdf.id) from saba_files sdf,saba_period_statement sty where sty.id=sdf.page_id  and sty.company_id=sc.ID) vvv
+       
+  from SABA_PERIOD_STATEMENT sp
+  left join saba_company sc on sp.company_id=sc.id
+  where (sp.SORT=1 OR sp.SORT IS NULL) AND PERIOD<13  AND
+ (:P_COMPANY_ID IS NULL OR company_ID=:P_COMPANY_ID) 
+ and type=1
+ and sp.form_confirm in (10,2)
+این کوئری SQL اطلاعات مربوط به صورت‌ حساب‌های دوره‌ای و وضعیت‌های مختلف آنها را از جدول‌های SABA_PERIOD_STATEMENT و SABA_COMPANY استخراج می‌کند. در ادامه، توضیحات دقیق‌تر در مورد اجزای مختلف کوئری آورده شده است.
+تحلیل کوئری:
+1.	COMPANY_ID, sc.name:
+o	شناسه شرکت (COMPANY_ID) و نام شرکت (sc.name) از جدول SABA_COMPANY نمایش داده می‌شود.
+2.	CASE WHEN status = 1 THEN 'حسابرسی شده' ...:
+o	وضعیت حسابرسی (با استفاده از عبارت CASE) نمایش داده می‌شود:
+	status = 1 => 'حسابرسی شده'
+	status = 2 => 'حسابرسی نشده'
+	اگر status برابر NULL باشد، '-' نمایش داده می‌شود.
+3.	CASE WHEN FILE_STATUS IS NULL THEN 'فایلی آپلود نشده'...:
+o	وضعیت فایل با استفاده از CASE بررسی می‌شود:
+	اگر FILE_STATUS برابر NULL باشد، 'فایلی آپلود نشده' نمایش داده می‌شود.
+	اگر FILE_STATUS = 31 باشد، 'فایل آپلود شده است' نمایش داده می‌شود.
+4.	DECODE(NVL(FILE_STATUS, 'null'), 'null', 'fa fa-upload', 'fa fa-check-square green-fa') AS icon:
+o	از DECODE برای تعیین آیکن مناسب برای وضعیت فایل استفاده می‌شود:
+	اگر FILE_STATUS برابر NULL باشد، آیکن 'fa fa-upload' نمایش داده می‌شود.
+	در غیر این صورت آیکن 'fa fa-check-square green-fa' نمایش داده می‌شود.
+5.	sp.ID:
+o	شناسه رکورد از جدول SABA_PERIOD_STATEMENT (با نام مستعار sp) نمایش داده می‌شود.
+6.	(SELECT ID FROM SABA_PERIOD_STATEMENT WHERE FIN_YEAR = sp.FIN_YEAR ...):
+o	یک زیرکوئری برای استخراج شناسه ترکیبی (COMB_ID) با توجه به سال مالی (FIN_YEAR)، دوره (PERIOD)، نوع (SORT=2)، و شناسه شرکت (با company_id = 33).
+7.	FIN_YEAR:
+o	سال مالی از جدول SABA_PERIOD_STATEMENT نمایش داده می‌شود.
+8.	CASE WHEN PERIOD = 3 THEN 'سه ماهه' ...:
+o	با استفاده از عبارت CASE، دوره (PERIOD) به صورت قابل فهم نمایش داده می‌شود:
+	3 ماهه به 'سه ماهه'
+	6 ماهه به 'شش ماهه'
+	9 ماهه به 'نه ماهه'
+	12 ماهه به 'سالانه'
+	اگر PERIOD برابر NULL باشد، '-' نمایش داده می‌شود.
+9.	CASE WHEN STATE_COMMENT = 1 THEN 'مقبول' ...:
+o	وضعیت نظر (STATE_COMMENT) با استفاده از CASE به وضعیت‌های قابل فهم تبدیل می‌شود:
+	1 به 'مقبول'
+	2 به 'مشروط'
+	3 به 'مردود'
+	4 به 'عدم اظهار نظر'
+	اگر STATE_COMMENT برابر NULL باشد، '-' نمایش داده می‌شود.
+10.	CASE WHEN RENEW = 1 THEN 'دارد' ...:
+o	وضعیت تمدید (RENEW) با استفاده از CASE به وضعیت‌های قابل فهم تبدیل می‌شود:
+	1 به 'دارد'
+	2 به 'ندارد'
+	اگر RENEW برابر NULL باشد، '-' نمایش داده می‌شود.
+11.	'' AS CONF:
+o	یک ستون خالی به نام CONF که هیچ داده‌ای ندارد.
+12.	CASE WHEN sp.FORM_CONFIRM IS NULL THEN '<span style="color: grey;">-</span>' ...:
+o	وضعیت تأیید فرم (FORM_CONFIRM) به یکی از وضعیت‌های قابل فهم و با رنگ‌های مختلف نمایش داده می‌شود:
+	NULL => <span style="color: grey;">-</span>
+	10 => <span style="color: grey;">منتظر رسیدگی</span>
+	2 => <span style="color: grey;">تایید شده</span>
+	3 => <span style="color: grey;">رد شده</span>
+13.	TYPE:
+o	نوع (TYPE) از جدول SABA_PERIOD_STATEMENT نمایش داده می‌شود.
+14.	CREATED_USER:
+o	کاربری که رکورد را ایجاد کرده است.
+15.	'' AS FORM_CONFIRM_ADMIN:
+o	یک ستون خالی با نام FORM_CONFIRM_ADMIN که هیچ داده‌ای ندارد.
+16.	CASE WHEN sort IS NULL THEN 'اصلی' WHEN sort = 1 THEN 'اصلی' WHEN sort = 2 THEN 'تلفیقی' END sort:
+o	وضعیت sort به یکی از دو مقدار 'اصلی' یا 'تلفیقی' تبدیل می‌شود.
+17.	'' AS BENEFIT_LOSS, '' AS COMB_BENEFIT_LOSS, ...:
+o	چندین ستون خالی که داده‌ای ندارند.
+18.	(:APP_PAGE_ID) AS xxx, :APP_USER AS APP_US:
+o	پارامترهای ورودی APP_PAGE_ID و APP_USER به نام‌های مستعار xxx و APP_US نمایش داده می‌شوند.
+19.	'' AS FILES, '' AS HISTORY:
+o	ستون‌های خالی برای فایل‌ها و تاریخچه.
+20.	(SELECT (SELECT a1.user_name FROM saba_users a1 WHERE h2.company_id = a1.company_id AND a1.status = 'POWER_USER') ss ...):
+o	زیرکوئری برای یافتن نام کاربری مدیر شرکت (POWER_USER) برای هر شرکت.
+21.	(SELECT MIN(sdf.id) FROM saba_files sdf, saba_period_statement sty WHERE sty.id = sdf.page_id AND sty.company_id = sc.ID) vvv:
+o	زیرکوئری برای استخراج حداقل شناسه فایل مربوط به هر شرکت از جدول SABA_FILES.
+شرایط فیلتر (WHERE):
+•	(:P_COMPANY_ID IS NULL OR company_ID = :P_COMPANY_ID): اگر پارامتر P_COMPANY_ID خالی نباشد، فقط رکوردهایی که company_ID برابر با P_COMPANY_ID باشد، نمایش داده می‌شوند.
+•	AND sp.SORT = 1 OR sp.SORT IS NULL AND PERIOD < 13: رکوردهایی که SORT برابر با 1 یا NULL باشد و PERIOD کمتر از 13 (ماه‌ها) باشد.
+•	AND type = 1: فقط رکوردهایی که نوع آنها برابر با 1 باشد، نمایش داده می‌شود.
+•	AND sp.form_confirm IN (10, 2): فیلتر برای نمایش رکوردهایی که FORM_CONFIRM برابر با 10 (منتظر رسیدگی) یا 2 (تایید شده) باشد.
+نتیجه‌گیری:
+این کوئری برای استخراج اطلاعات مربوط به صورت‌ حساب‌های دوره‌ای شرکت‌ها است و وضعیت‌های مختلف فایل‌ها، تأییدها، نظرها و سایر جزئیات مربوط به گزارش‌های مالی را نمایش می‌دهد. علاوه بر این، برای هر رکورد اطلاعات مربوط به کاربران و وضعیت‌های مختلف سیستم نمایش داده می‌شود.
+
+3
+select COMPANY_ID,
+sc.name,
+case when status=1 then 'حسابرسی شده'
+when status=2 then 'حسابرسی نشده'
+when status is null then '-'
+end status,
+case 
+       when FILE_STATUS is Null then 'فایلی آپلود نشده'
+       when FILE_STATUS=31 then 'فایل آپلود شده است'   
+       --when FILE_STATUS=3 then 'تایید'
+       --when FILE_STATUS=4 then 'رد' 
+       end
+       FILE_STATUS,
+       DECODE(NVL(FILE_STATUS, 'null'), 'null', 'fa fa-upload', 'fa fa-check-square green-fa') icon,
+       --DECODE(NVL(FILE_STATUS, 'null'), 'null', 'fa fa-upload', 'fa fa-check-circle') icon,
+       sp.ID,
+        (SELECT ID FROM SABA_PERIOD_STATEMENT WHERE FIN_YEAR=sp.FIN_YEAR AND PERIOD=sp.PERIOD AND SORT=2 and company_id=33) AS COMB_ID,
+       FIN_YEAR,
+       case 
+       when PERIOD=3  then 'سه ماهه'
+       when PERIOD=6  then 'شش ماهه'
+       when PERIOD=9  then 'نه ماهه'
+       when PERIOD=12  then 'سالانه'
+       when PERIOD is null then '-'
+       end PERIOD,
+        case 
+        when STATE_COMMENT=1  then 'مقبول'
+        when STATE_COMMENT=2  then 'مشروط'
+        when STATE_COMMENT=3  then  'مردود'
+        when STATE_COMMENT=4  then 'عدم اظهار نظر'
+        when STATE_COMMENT is null then '-'
+       end STATE_COMMENT,
+       case 
+       when RENEW=1 then  'دارد'
+       when RENEW=2 then 'ندارد'
+       when RENEW is null then '-'
+       end RENEW,
+       ''CONF,
+       CASE 
+       WHEN sp.FORM_CONFIRM is null THEN '-'
+       WHEN sp.FORM_CONFIRM=10 then 'منتظر رسیدگی'
+       WHEN sp.FORM_CONFIRM=2 then 'تایید شده'
+       WHEN sp.FORM_CONFIRM=3 then ' رد شده'
+       END as FORM_CONFIRMM,
+       TYPE,
+       CREATED_USER,
+       ''FORM_CONFIRM_ADMIN,
+      -- ''update_row,
+       case 
+       when sort is null then 'اصلی'
+       when sort=1 then 'اصلی'
+       when sort=2 then 'تلفیقی'
+       end sort,
+    --   case when confirm=1 then 'تایید شده'
+    --    when confirm=2 then 'رد شده'
+    --    when confirm is null then 'فایلی آپلود نشده است'
+    --     when confirm=10 then 'در حال بررسی ...'
+    --    end confirm,
+       '' BENEFIT_LOSS,
+       '' COMB_BENEFIT_LOSS,
+       '' FINANCIAL_REPORT,
+       '' COMB_FINANCIAL_REPORT,
+       '' CASH_FLOW,
+       '' COMB_CASH_FLOW,
+       '' NEW_BENEFIT_LOSS,
+       '' COMB_NEW_BENEFIT_LOSS,
+        (:APP_PAGE_ID) as xxx,
+        :APP_USER as APP_US,
+        '' files,
+        (select (select a1.user_name from saba_users a1 WHERE h2.company_id=a1.company_id  and a1.status='POWER_USER' )ss FROM saba_users h2 
+ WHERE 
+  h2.status='USER'
+ and upper(h2.user_name) = :APP_USER
+ and h2.company_id= sc.ID) bb,
+ (select min(sdf.id) from saba_files sdf,saba_period_statement sty where sty.id=sdf.page_id  and sty.company_id=sc.ID) vvv
+       
+  from SABA_PERIOD_STATEMENT sp
+  left join saba_company sc on sp.company_id=sc.id
+  where (sp.SORT=1 OR sp.SORT IS NULL) AND PERIOD<13  AND
+ (:P_COMPANY_ID IS NULL OR company_ID=:P_COMPANY_ID) 
+ and type=1
+ and sp.form_confirm=2
+تحلیل کوئری:
+COMPANY_ID, sc.name:
+همانند قبل، شناسه شرکت و نام شرکت از جدول SABA_COMPANY به دست می‌آید.
+CASE WHEN status = 1 THEN 'حسابرسی شده' ...:
+وضعیت حسابرسی (status) با استفاده از عبارت CASE به وضعیت‌های 'حسابرسی شده'، 'حسابرسی نشده' و '-' برای مقدار NULL تبدیل می‌شود.
+CASE WHEN FILE_STATUS IS NULL THEN 'فایلی آپلود نشده' ...:
+
+وضعیت فایل (FILE_STATUS) با استفاده از CASE به وضعیت‌های 'فایلی آپلود نشده' یا 'فایل آپلود شده است' تبدیل می‌شود.
+DECODE(NVL(FILE_STATUS, 'null'), 'null', 'fa fa-upload', 'fa fa-check-square green-fa') icon:
+آیکن مناسب برای وضعیت فایل با استفاده از DECODE و تابع NVL تعیین می‌شود:
+اگر FILE_STATUS برابر NULL باشد، آیکن 'fa fa-upload' نمایش داده می‌شود.
+در غیر این صورت آیکن 'fa fa-check-square green-fa' نمایش داده می‌شود.
+sp.ID:
+شناسه رکورد از جدول SABA_PERIOD_STATEMENT که به عنوان sp.ID نمایش داده می‌شود.
+(SELECT ID FROM SABA_PERIOD_STATEMENT WHERE FIN_YEAR = sp.FIN_YEAR ...):
+یک زیرکوئری برای استخراج شناسه ترکیبی (COMB_ID) با توجه به سال مالی (FIN_YEAR)، دوره (PERIOD)، نوع (SORT=2)، و شناسه شرکت (با company_id=33).
+FIN_YEAR:
+سال مالی از جدول SABA_PERIOD_STATEMENT.
+CASE WHEN PERIOD = 3 THEN 'سه ماهه' ...:
+دوره‌ها (PERIOD) با استفاده از CASE به دوره‌های مختلفی مانند 'سه ماهه'، 'شش ماهه'، 'نه ماهه' و 'سالانه' تبدیل می‌شوند.
+CASE WHEN STATE_COMMENT = 1 THEN 'مقبول' ...:
+وضعیت نظر (STATE_COMMENT) با استفاده از CASE به وضعیت‌های قابل فهم تبدیل می‌شود:
+1 به 'مقبول'
+2 به 'مشروط'
+3 به 'مردود'
+4 به 'عدم اظهار نظر'
+اگر STATE_COMMENT برابر NULL باشد، '-' نمایش داده می‌شود.
+CASE WHEN RENEW = 1 THEN 'دارد' ...:
+وضعیت تمدید (RENEW) با استفاده از CASE به وضعیت‌های قابل فهم تبدیل می‌شود:
+1 به 'دارد'
+2 به 'ندارد'
+اگر RENEW برابر NULL باشد، '-' نمایش داده می‌شود.
+''CONF:
+یک ستون خالی به نام CONF که هیچ داده‌ای ندارد.
+CASE WHEN sp.FORM_CONFIRM IS NULL THEN '-' ...:
+وضعیت تأیید فرم (FORM_CONFIRM) به صورت رشته‌هایی با رنگ‌های مختلف تبدیل می‌شود:
+اگر FORM_CONFIRM برابر NULL باشد، مقدار '-' نمایش داده می‌شود.
+اگر FORM_CONFIRM = 10 باشد، 'منتظر رسیدگی' نمایش داده می‌شود.
+اگر FORM_CONFIRM = 2 باشد، 'تایید شده' نمایش داده می‌شود.
+اگر FORM_CONFIRM = 3 باشد، 'رد شده' نمایش داده می‌شود.
+TYPE:
+نوع (TYPE) از جدول SABA_PERIOD_STATEMENT.
+CREATED_USER:
+کاربری که رکورد را ایجاد کرده است.
+''FORM_CONFIRM_ADMIN:
+یک ستون خالی برای تأیید مدیریت (FORM_CONFIRM_ADMIN).
+CASE WHEN sort IS NULL THEN 'اصلی' WHEN sort = 1 THEN 'اصلی' WHEN sort = 2 THEN 'تلفیقی' END sort:
+وضعیت sort به یکی از دو مقدار 'اصلی' یا 'تلفیقی' تبدیل می‌شود.
+'' BENEFIT_LOSS, '' COMB_BENEFIT_LOSS, ...:
+چندین ستون خالی برای موارد مختلف گزارش مالی مانند BENEFIT_LOSS، COMB_BENEFIT_LOSS، FINANCIAL_REPORT و غیره.
+(:APP_PAGE_ID) AS xxx, :APP_USER AS APP_US:
+پارامترهای ورودی APP_PAGE_ID و APP_USER به نام‌های مستعار xxx و APP_US.
+'' files, (select ...):
+ستون‌های خالی برای فایل‌ها و تاریخچه، و همچنین یک زیرکوئری برای پیدا کردن کاربری با وضعیت 'POWER_USER' برای هر شرکت.
+(SELECT MIN(sdf.id) FROM saba_files sdf, saba_period_statement sty WHERE sty.id = sdf.page_id AND sty.company_id = sc.ID) vvv:
+زیرکوئری برای استخراج حداقل شناسه فایل مربوط به هر شرکت از جدول SABA_FILES.
+شرایط فیلتر (WHERE):
+(:P_COMPANY_ID IS NULL OR company_ID = :P_COMPANY_ID):
+اگر پارامتر P_COMPANY_ID موجود باشد، فقط رکوردهایی که company_ID برابر با P_COMPANY_ID باشد، نمایش داده می‌شود.
+AND (sp.SORT = 1 OR sp.SORT IS NULL) AND PERIOD < 13:
+فقط رکوردهایی که SORT برابر با 1 یا NULL و PERIOD کمتر از 13 (ماه‌ها) باشد، نمایش داده می‌شود.
+AND type = 1:
+فقط رکوردهایی که type برابر با 1 باشد، نمایش داده می‌شود.
+AND sp.form_confirm = 2:
+فقط رکوردهایی که FORM_CONFIRM برابر با 2 (تایید شده) باشد، نمایش داده می‌شود.
+نتیجه‌گیری:
+این کوئری برای استخراج اطلاعات از صورت‌ حساب‌های دوره‌ای مربوط به شرکت‌ها است. در اینجا، وضعیت‌های مختلف برای فایل‌ها، تایید‌ها، نظر‌ها و وضعیت‌های مالی مختلف در نظر گرفته شده است. این کوئری همچنین اطلاعات مربوط به کاربران و وضعیت‌های مدیریت را نمایش می‌دهد و فیلترهایی برای انتخاب رکوردهای خاص براساس شرکت، نوع و وضعیت تأیید اعمال می‌کند.
+query:(3)
+1
+select
+
+        rownum, 
+       sc.name,
+       sps.COMPANY_ID,
+       sps.ID,
+       FIN_YEAR,
+       case 
+       when period=3 then '3 ماهه عملکردی و 9 ماهه پیش بینی'
+       when period=6 then '6 ماهه عملکردی و 6 ماه پیش بینی'
+       when period=9 then '9 ماهه عملکردی و 3 ماهه پیش بینی'
+       when period=12 then 'بودجه اولیه'
+      end PERIOD,
+      case 
+       when FILE_STATUS is Null then 'فایلی آپلود نشده'
+       when FILE_STATUS=31 then 'فایل آپلود شده است'   
+       --when FILE_STATUS=3 then 'تایید'
+       --when FILE_STATUS=4 then 'رد' 
+       end
+       FILE_STATUS,
+       DECODE(NVL(FILE_STATUS, 'null'), 'null', 'fa fa-upload', 'fa fa-check-square green-fa') icon,
+       TYPE,
+    --    case 
+    --    when confirm=1 then 'تایید شده'
+    --    when confirm=2 then 'رد شده'
+    --    when confirm is null then 'فایلی آپلود نشده است'
+    --    when confirm=14 then 'در حال بررسی ...'
+    --    end confirm,
+        ''CONF,
+       CASE 
+       WHEN sps.FORM_CONFIRM is null THEN '-'
+       WHEN sps.FORM_CONFIRM=14 then 'منتظر رسیدگی'
+       WHEN sps.FORM_CONFIRM=2 then 'تایید شده'
+       WHEN sps.FORM_CONFIRM=3 then ' رد شده'
+       END FORM_CONFIRM,
+       ''form_confirm_admin,
+       CREATED_USER,
+        (:APP_PAGE_ID) as xxx,
+       :APP_USER as APP_US,
+              (select (select a1.user_name from saba_users a1 WHERE h2.company_id=a1.company_id  and a1.status='POWER_USER' )ss FROM saba_users h2 
+ WHERE 
+  h2.status='USER'
+ and upper(h2.user_name) = :APP_USER
+ and h2.company_id= sc.ID) bb,
+  (select min(sdf.id) from saba_files sdf,saba_period_statement sty where sty.id=sdf.page_id  and sty.company_id=sc.ID) vvv,
+  ''files,
+  ''BENEFIT_LOSS,
+  ''HISTORY
+--  ''approval_status
+  --''delete_row
+  from SABA_PERIOD_STATEMENT sps
+  left join saba_company sc on sps.company_id=sc.id
+  where
+ (:P_COMPANY_ID IS NULL OR company_ID=:P_COMPANY_ID) 
+ and type=2
+تحلیل کوئری:
+rownum:
+
+ستون rownum که در SQL معمولاً برای نمایش شماره ردیف‌های نتیجه‌گیری استفاده می‌شود.
+sc.name, sps.COMPANY_ID, sps.ID, FIN_YEAR:
+
+نام شرکت، شناسه شرکت (COMPANY_ID)، شناسه صورت‌حساب (ID) و سال مالی (FIN_YEAR) از جداول SABA_COMPANY و SABA_PERIOD_STATEMENT استخراج می‌شود.
+CASE WHEN PERIOD = 3 THEN '3 ماهه عملکردی و 9 ماهه پیش بینی' ...:
+
+مقادیر ستون PERIOD (دوره) به مقادیر توصیفی تبدیل می‌شود:
+3 ماهه → '3 ماهه عملکردی و 9 ماهه پیش بینی'
+6 ماهه → '6 ماهه عملکردی و 6 ماه پیش بینی'
+9 ماهه → '9 ماهه عملکردی و 3 ماهه پیش بینی'
+12 ماهه → 'بودجه اولیه'
+CASE WHEN FILE_STATUS IS NULL THEN 'فایلی آپلود نشده' ...:
+وضعیت فایل (FILE_STATUS) با استفاده از CASE به وضعیت‌های مختلف تبدیل می‌شود:
+اگر FILE_STATUS برابر با NULL باشد، 'فایلی آپلود نشده' نمایش داده می‌شود.
+اگر FILE_STATUS برابر با 31 باشد، 'فایل آپلود شده است' نمایش داده می‌شود.
+DECODE(NVL(FILE_STATUS, 'null'), 'null', 'fa fa-upload', 'fa fa-check-square green-fa') icon:
+
+با استفاده از DECODE و NVL، آیکن مناسب برای وضعیت فایل تعیین می‌شود:
+اگر FILE_STATUS برابر NULL باشد، آیکن 'fa fa-upload' نمایش داده می‌شود.
+در غیر این صورت آیکن 'fa fa-check-square green-fa' نمایش داده می‌شود.
+TYPE:
+نوع صورت‌حساب (TYPE) از جدول SABA_PERIOD_STATEMENT.
+CONF:
+یک ستون خالی به نام CONF که هیچ داده‌ای ندارد.
+CASE WHEN sps.FORM_CONFIRM IS NULL THEN '-' ...:
+وضعیت تأیید فرم (FORM_CONFIRM) به مقادیر توصیفی تبدیل می‌شود:
+اگر FORM_CONFIRM برابر NULL باشد، مقدار '-' نمایش داده می‌شود.
+اگر FORM_CONFIRM برابر با 14 باشد، 'منتظر رسیدگی' نمایش داده می‌شود.
+اگر FORM_CONFIRM برابر با 2 باشد، 'تایید شده' نمایش داده می‌شود.
+اگر FORM_CONFIRM برابر با 3 باشد، 'رد شده' نمایش داده می‌شود.
+''form_confirm_admin:
+یک ستون خالی برای تأیید مدیریت (form_confirm_admin).
+CREATED_USER:
+کاربری که رکورد را ایجاد کرده است.
+(:APP_PAGE_ID) as xxx, :APP_USER as APP_US:
+پارامترهای ورودی APP_PAGE_ID و APP_USER به نام‌های مستعار xxx و APP_US.
+(SELECT (SELECT a1.user_name FROM saba_users a1 WHERE h2.company_id = a1.company_id AND a1.status = 'POWER_USER') ss FROM saba_users h2 WHERE h2.status = 'USER' AND upper(h2.user_name) = :APP_USER AND h2.company_id = sc.ID) bb:
+
+یک زیرکوئری برای پیدا کردن کاربری با وضعیت 'POWER_USER' برای هر شرکت، در صورتی که کاربری که با نام APP_USER وارد شده است، وضعیت 'USER' داشته باشد.
+(SELECT MIN(sdf.id) FROM saba_files sdf, saba_period_statement sty WHERE sty.id = sdf.page_id AND sty.company_id = sc.ID) vvv:
+
+یک زیرکوئری برای استخراج حداقل شناسه فایل (id) مربوط به هر شرکت از جدول SABA_FILES.
+''files, ''BENEFIT_LOSS, ''HISTORY:
+ستون‌های خالی برای فایل‌ها، ضرر و سود و تاریخچه.
+شرایط فیلتر (WHERE):
+(:P_COMPANY_ID IS NULL OR company_ID = :P_COMPANY_ID):
+اگر پارامتر P_COMPANY_ID موجود باشد، فقط رکوردهایی که company_ID برابر با P_COMPANY_ID باشد، نمایش داده می‌شود.
+AND type = 2:
+فقط رکوردهایی که type برابر با 2 باشد، نمایش داده می‌شود.
+نتیجه‌گیری:
+این کوئری برای استخراج اطلاعات از صورت‌حساب‌های دوره‌ای شرکت‌ها طراحی شده است. اطلاعاتی مانند وضعیت فایل‌ها، وضعیت تأیید فرم‌ها، نوع دوره، شناسه‌های مختلف، و همچنین اطلاعات مدیریتی و وضعیت‌های مختلف (مثل وضعیت فایل و تأیید فرم) را در اختیار می‌گذارد. این کوئری همچنین امکان فیلتر کردن نتایج بر اساس شناسه شرکت و نوع صورت‌حساب را فراهم می‌آورد.  
+2-
+select       
+rownum,
+    sc.name,
+       sps.COMPANY_ID,
+       sps.ID,
+       FIN_YEAR,
+       case 
+       when period=3 then '3 ماهه عملکردی و 9 ماهه پیش بینی'
+       when period=6 then '6 ماهه عملکردی و 6 ماه پیش بینی'
+       when period=9 then '9 ماهه عملکردی و 3 ماهه پیش بینی'
+       when period=12 then 'بودجه اولیه'
+      end PERIOD,
+      case 
+       when FILE_STATUS is Null then 'فایلی آپلود نشده'
+       when FILE_STATUS=31 then 'فایل آپلود شده است'   
+       end
+       FILE_STATUS,
+       DECODE(NVL(FILE_STATUS, 'null'), 'null', 'fa fa-upload', 'fa fa-check-square green-fa') icon,
+       TYPE,
+        ''CONF,
+       CASE 
+       WHEN sps.FORM_CONFIRM is null THEN '-'
+       WHEN sps.FORM_CONFIRM=14 then 'منتظر رسیدگی'
+       WHEN sps.FORM_CONFIRM=2 then 'تایید شده'
+       WHEN sps.FORM_CONFIRM=3 then ' رد شده'
+       END FORM_CONFIRM,
+       ''form_confirm_admin,
+       CREATED_USER,
+        (:APP_PAGE_ID) as xxx,
+       :APP_USER as APP_US,
+              (select (select a1.user_name from saba_users a1 WHERE h2.company_id=a1.company_id  and a1.status='POWER_USER' )ss FROM saba_users h2 
+ WHERE 
+  h2.status='USER'
+ and upper(h2.user_name) = :APP_USER
+ and h2.company_id= sc.ID) bb,
+  (select min(sdf.id) from saba_files sdf,saba_period_statement sty where sty.id=sdf.page_id  and sty.company_id=sc.ID) vvv,
+  ''files,
+  ''BENEFIT_LOSS,
+  ''HISTORY
+  from SABA_PERIOD_STATEMENT sps
+  left join saba_company sc on sps.company_id=sc.id
+  where
+ (:P_COMPANY_ID IS NULL OR company_ID=:P_COMPANY_ID) 
+ and type=2
+and sps.form_confirm in(2,14)
+rownum:
+برای نمایش شماره ردیف‌های نتیجه‌گیری استفاده می‌شود.
+sc.name:
+نام شرکت از جدول SABA_COMPANY.
+sps.COMPANY_ID, sps.ID, FIN_YEAR:
+شناسه شرکت، شناسه صورت‌حساب و سال مالی از جدول SABA_PERIOD_STATEMENT.
+CASE برای تبدیل PERIOD به توصیف‌های فارسی:
+در این قسمت PERIOD به مقادیر توصیفی تبدیل می‌شود:
+3 → '3 ماهه عملکردی و 9 ماهه پیش بینی'
+6 → '6 ماهه عملکردی و 6 ماه پیش بینی'
+9 → '9 ماهه عملکردی و 3 ماهه پیش بینی'
+12 → 'بودجه اولیه'
+CASE برای وضعیت فایل (FILE_STATUS):
+اگر FILE_STATUS برابر با NULL باشد، 'فایلی آپلود نشده' نمایش داده می‌شود.
+اگر FILE_STATUS برابر با 31 باشد، 'فایل آپلود شده است' نمایش داده می‌شود.
+DECODE برای تبدیل وضعیت فایل به آیکن:
+اگر FILE_STATUS برابر با NULL باشد، آیکن 'fa fa-upload' نمایش داده می‌شود.
+در غیر این صورت، آیکن 'fa fa-check-square green-fa' نمایش داده می‌شود.
+TYPE:
+نوع صورت‌حساب از جدول SABA_PERIOD_STATEMENT.
+CONF:
+یک ستون خالی برای نمایش وضعیت تایید.
+CASE برای تبدیل FORM_CONFIRM به وضعیت‌های توصیفی:
+اگر FORM_CONFIRM برابر با NULL باشد، مقدار '-' نمایش داده می‌شود.
+اگر FORM_CONFIRM برابر با 14 باشد، 'منتظر رسیدگی' نمایش داده می‌شود.
+اگر FORM_CONFIRM برابر با 2 باشد، 'تایید شده' نمایش داده می‌شود.
+اگر FORM_CONFIRM برابر با 3 باشد، 'رد شده' نمایش داده می‌شود.
+form_confirm_admin:
+یک ستون خالی برای نمایش اطلاعات مدیریت تایید.
+CREATED_USER:
+کاربری که رکورد را ایجاد کرده است.
+(:APP_PAGE_ID) as xxx, :APP_USER as APP_US:
+پارامترهای ورودی APP_PAGE_ID و APP_USER به نام‌های مستعار xxx و APP_US.
+زیرکوئری برای دریافت کاربر با وضعیت 'POWER_USER':
+زیرکوئری برای پیدا کردن کاربر با وضعیت 'POWER_USER' برای هر شرکت، در صورتی که کاربری که با نام APP_USER وارد شده است، وضعیت 'USER' داشته باشد.
+زیرکوئری برای پیدا کردن حداقل شناسه فایل:
+یک زیرکوئری برای استخراج حداقل شناسه فایل (id) مربوط به هر شرکت از جدول SABA_FILES.
+ستون‌های خالی برای files, BENEFIT_LOSS, HISTORY:
+ستون‌های خالی برای فایل‌ها، ضرر و سود و تاریخچه.
+فیلترها (WHERE):
+:P_COMPANY_ID IS NULL OR company_ID = :P_COMPANY_ID:
+اگر پارامتر P_COMPANY_ID موجود باشد، فقط رکوردهایی که company_ID برابر با P_COMPANY_ID باشد، نمایش داده می‌شود.
+AND type = 2:
+
+فقط رکوردهایی که type برابر با 2 باشد، نمایش داده می‌شود.
+AND sps.form_confirm IN (2, 14):
+
+فقط رکوردهایی که مقدار FORM_CONFIRM آنها برابر با 2 (تایید شده) یا 14 (منتظر رسیدگی) باشد، نمایش داده می‌شود.
+نتیجه‌گیری:
+این کوئری اطلاعات مربوط به صورت‌حساب‌های دوره‌ای شرکت‌ها را استخراج می‌کند. داده‌ها شامل وضعیت فایل، وضعیت تایید فرم‌ها، نوع صورت‌حساب، و سایر جزئیات مدیریتی مانند کاربر 'POWER_USER' و اطلاعات مربوط به تایید یا عدم تایید هستند. فیلترهایی برای انتخاب شرکت خاص و نوع صورت‌حساب نیز اعمال شده‌اند.
+3-
+select
+        rownum, 
+       sc.name,
+       sps.COMPANY_ID,
+       sps.ID,
+       FIN_YEAR,
+       case 
+       when period=3 then '3 ماهه عملکردی و 9 ماهه پیش بینی'
+       when period=6 then '6 ماهه عملکردی و 6 ماه پیش بینی'
+       when period=9 then '9 ماهه عملکردی و 3 ماهه پیش بینی'
+       when period=12 then 'بودجه اولیه'
+      end PERIOD,
+      case 
+       when FILE_STATUS is Null then 'فایلی آپلود نشده'
+       when FILE_STATUS=31 then 'فایل آپلود شده است'   
+       end
+       FILE_STATUS,
+       DECODE(NVL(FILE_STATUS, 'null'), 'null', 'fa fa-upload', 'fa fa-check-square green-fa') icon,
+       TYPE,
+        ''CONF,
+       CASE 
+       WHEN sps.FORM_CONFIRM is null THEN '-'
+       WHEN sps.FORM_CONFIRM=14 then 'منتظر رسیدگی'
+       WHEN sps.FORM_CONFIRM=2 then 'تایید شده'
+       WHEN sps.FORM_CONFIRM=3 then ' رد شده'
+       END FORM_CONFIRM,
+       ''form_confirm_admin,
+       CREATED_USER,
+        (:APP_PAGE_ID) as xxx,
+       :APP_USER as APP_US,
+              (select (select a1.user_name from saba_users a1 WHERE h2.company_id=a1.company_id  and a1.status='POWER_USER' )ss FROM saba_users h2 
+ WHERE 
+  h2.status='USER'
+ and upper(h2.user_name) = :APP_USER
+ and h2.company_id= sc.ID) bb,
+  (select min(sdf.id) from saba_files sdf,saba_period_statement sty where sty.id=sdf.page_id  and sty.company_id=sc.ID) vvv,
+  ''files,
+  ''BENEFIT_LOSS
+  from SABA_PERIOD_STATEMENT sps
+  left join saba_company sc on sps.company_id=sc.id
+  where
+ (:P_COMPANY_ID IS NULL OR company_ID=:P_COMPANY_ID) 
+ and type=2
+and sps.form_confirm=2
+
+1.	rownum:
+o	شماره ردیف‌ها را در نتایج کوئری نمایش می‌دهد.
+2.	sc.name:
+o	نام شرکت از جدول SABA_COMPANY.
+3.	sps.COMPANY_ID, sps.ID, FIN_YEAR:
+o	شناسه شرکت، شناسه صورت‌حساب و سال مالی از جدول SABA_PERIOD_STATEMENT.
+4.	CASE برای تبدیل PERIOD به توصیف‌های فارسی:
+o	در این قسمت PERIOD به مقادیر توصیفی تبدیل می‌شود:
+	3 → '3 ماهه عملکردی و 9 ماهه پیش بینی'
+	6 → '6 ماهه عملکردی و 6 ماه پیش بینی'
+	9 → '9 ماهه عملکردی و 3 ماهه پیش بینی'
+	12 → 'بودجه اولیه'
+5.	CASE برای وضعیت فایل (FILE_STATUS):
+o	اگر FILE_STATUS برابر با NULL باشد، 'فایلی آپلود نشده' نمایش داده می‌شود.
+o	اگر FILE_STATUS برابر با 31 باشد، 'فایل آپلود شده است' نمایش داده می‌شود.
+6.	DECODE برای تبدیل وضعیت فایل به آیکن:
+o	اگر FILE_STATUS برابر با NULL باشد، آیکن 'fa fa-upload' نمایش داده می‌شود.
+o	در غیر این صورت، آیکن 'fa fa-check-square green-fa' نمایش داده می‌شود.
+7.	TYPE:
+o	نوع صورت‌حساب از جدول SABA_PERIOD_STATEMENT.
+8.	CONF:
+o	یک ستون خالی برای نمایش وضعیت تایید.
+9.	CASE برای تبدیل FORM_CONFIRM به وضعیت‌های توصیفی:
+o	اگر FORM_CONFIRM برابر با NULL باشد، مقدار '-' نمایش داده می‌شود.
+o	اگر FORM_CONFIRM برابر با 14 باشد، 'منتظر رسیدگی' نمایش داده می‌شود.
+o	اگر FORM_CONFIRM برابر با 2 باشد، 'تایید شده' نمایش داده می‌شود.
+o	اگر FORM_CONFIRM برابر با 3 باشد، 'رد شده' نمایش داده می‌شود.
+10.	form_confirm_admin:
+o	یک ستون خالی برای نمایش اطلاعات مدیریت تایید.
+11.	CREATED_USER:
+o	کاربری که رکورد را ایجاد کرده است.
+12.	(:APP_PAGE_ID) as xxx, :APP_USER as APP_US:
+o	پارامترهای ورودی APP_PAGE_ID و APP_USER به نام‌های مستعار xxx و APP_US.
+13.	زیرکوئری برای دریافت کاربر با وضعیت 'POWER_USER':
+o	زیرکوئری برای پیدا کردن کاربر با وضعیت 'POWER_USER' برای هر شرکت، در صورتی که کاربری که با نام APP_USER وارد شده است، وضعیت 'USER' داشته باشد.
+14.	زیرکوئری برای پیدا کردن حداقل شناسه فایل:
+o	یک زیرکوئری برای استخراج حداقل شناسه فایل (id) مربوط به هر شرکت از جدول SABA_FILES.
+15.	ستون‌های خالی برای files, BENEFIT_LOSS:
+o	ستون‌های خالی برای فایل‌ها و ضرر و سود.
+فیلترها (WHERE):
+•	:P_COMPANY_ID IS NULL OR company_ID = :P_COMPANY_ID:
+o	اگر پارامتر P_COMPANY_ID موجود باشد، فقط رکوردهایی که company_ID برابر با P_COMPANY_ID باشد، نمایش داده می‌شود.
+•	AND type = 2:
+o	فقط رکوردهایی که type برابر با 2 باشد، نمایش داده می‌شود.
+•	AND sps.form_confirm = 2:
+o	فقط رکوردهایی که مقدار FORM_CONFIRM آنها برابر با 2 (تایید شده) باشد، نمایش داده می‌شود.
+نتیجه‌گیری:
+این کوئری اطلاعات مربوط به صورت‌حساب‌های دوره‌ای تایید شده شرکت‌ها را استخراج می‌کند. داده‌ها شامل وضعیت فایل، وضعیت تایید فرم‌ها، نوع صورت‌حساب، و سایر جزئیات مدیریتی مانند کاربر 'POWER_USER' و اطلاعات مربوط به تایید یا عدم تایید هستند. همچنین از فیلترهایی برای انتخاب شرکت خاص و نوع صورت‌حساب و وضعیت تایید استفاده می‌شود.
+
+
+FIN
