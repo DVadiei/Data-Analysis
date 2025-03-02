@@ -1,0 +1,33 @@
+###First Way###
+UPDATE "HOLDINGUSER"."BOARD"
+SET "POSITION" = CASE "POSITION"
+                    WHEN 'عضو هیئت مدیره اصلی' THEN 1
+                    WHEN 'عضو هیئت مدیره علی البدل' THEN 2
+                    WHEN 'مدیر عامل' THEN 3
+                    WHEN 'نائب رئیس هیئت مدیره' THEN 4
+                    WHEN 'رئیس هیئت مدیره' THEN 5
+                    WHEN 'مدیر عامل و رئیس هیئت مدیره' THEN 6
+                    WHEN 'مدیر عامل و نائب رئیس هیئت مدیره' THEN 7
+                    WHEN 'مدیر عامل و عضو هیئت مدیره' THEN 8
+                    ELSE "POSITION"
+                 END;
+
+
+###Second Way###
+
+DECLARE
+  POSITION_MAP  SYS.ODCIVARCHAR2LIST := SYS.ODCIVARCHAR2LIST(
+    'عضو هیئت مدیره اصلی', 'عضو هیئت مدیره علی البدل', 'مدیر عامل', 
+    'نائب رئیس هیئت مدیره', 'رئیس هیئت مدیره', 
+    'مدیر عامل و رئیس هیئت مدیره', 'مدیر عامل و نائب رئیس هیئت مدیره', 
+    'مدیر عامل و عضو هیئت مدیره'
+  );
+  
+  POSITION_VALUES SYS.ODCINUMBERLIST := SYS.ODCINUMBERLIST(1, 2, 3, 4, 5, 6, 7, 8);
+BEGIN
+  FOR i IN 1..POSITION_MAP.COUNT LOOP
+    UPDATE "HOLDINGUSER"."BOARD"
+    SET "POSITION" = POSITION_VALUES(i)
+    WHERE "POSITION" = POSITION_MAP(i);
+  END LOOP;
+END;
